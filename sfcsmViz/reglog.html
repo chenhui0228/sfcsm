@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>RegLog</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css"/>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-cookies.min.js"></script>
+    <script src="scripts/angular/angular-animate.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/bootstrap.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.usermanage_title{width:100%;margin:10px auto;}
+        .usermanage_title{height:28px;overflow:hidden;}
+        .usermanage_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .usermanage_title ul li{width:40%;list-style:none;}
+        .usermanage_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .usermanage_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #usermanagelist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .userlist{width:100%;height:auto;overflow:hidden;}
+        .userlist ul{float:left;margin-left:0px;margin-right:0px;overflow:hidden;}
+        .userlist ul li{list-style:none;padding:4px;}
+        .userlist .user_name{width:15%;}
+        .userlist .user_detail{width:83%;}
+        .userlist .userDetail_Operation{width:34%;}
+        .userlist .user_name li{border:1px solid #eee;border-bottom:none;padding:10px;text-align:center;cursor:pointer;}
+        .userlist .user_name li:last-child{border-bottom:1px solid #eee;}
+        .userlist .user_name li:hover{background-color:rgba(236 ,198, 198, 0.32);}
+        .userlist .user_detail table tr td{padding:4px;border:1px solid #eee;}
+        .bck{background-color:rgba(236 ,198, 198, 0.32);}
+        .uds_first{text-align:right;}
+        .uds_first label{margin-right:4px;float:right;}
+        .udo,.isnewpwd{display:none;}
+        .udc_table{border:0;}
+        .udc_table tr{border-bottom:1px solid #eee;}
+        .udc_table tr:last-child{border-bottom:0px;}
+        .udc_table tr td{padding:5px;}
+        .ud_detail_table table{width:98%;}
+        .click_style_1{background-color: rgba(236 ,198, 198, 0.32);}
+        .userDetail_add table tr td{padding:8px;}
+        .sud_model{float:left;}
+        .user_detail tr:hover{background-color:#f5f5f5;}
+        .role_label{margin-left:-8px;}
+        .roles{float:left;}
+    </style>
+    <script>
+        $(function(){
+            $(".user_reset").click(function(){
+                $("#user_name,#user_owner").val('');
+            });
+            $(".user_reset").click(function(){
+                $.each($(".user_model"), function(){
+                    if($(this).attr('type') == 'radio')
+                        $(this).attr('checked', false);
+                    else
+                        $(this).val('');
+                });
+            });
+            $("#change_password").change(function(){
+                if($(this).is(":checked"))
+                    $(".isnewpwd").show();
+                else
+                    $(".isnewpwd").hide();
+            });
+        });
+        function showOperation(obj, type){
+            $(".udo,.user_detail").hide();
+            if(isNullOrEmpty(type))
+                $("." + obj).show();
+            else $("." + obj).hide();
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="usermanage_title">
+    <ul>
+        <li>Register / Login</li>
+        <li></li>
+    </ul>
+</div>
+<div style="padding:0 0 5px 15px;">
+    new user
+    <a href="javascript:void(0);" ng-click="addUser()">
+        <i class="icon-plus-sign" alt="add a new user" title="add a new user"></i>
+    </a>
+</div>
+<div class="userlist">
+    <ul class="user_name">
+        <li class="users" ng-repeat="item in userList" ng-click="showUserDetail(item)">{{item.name}}</li>
+    </ul>
+    <ul class="user_detail hide ud_detail_table">
+        <table class="table-condensed table-nohead" style="margin-left:5px;">
+            <tbody>
+            <tr>
+                <td width="100px">Name</td>
+                <td> {{detaileduser.name}} </td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td> {{detaileduser.email}} </td>
+            </tr>
+            <tr>
+                <td>Role</td>
+                <td>{{detaileduser.roles}}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="uds_first">
+                    <button ng-click="showRegLogUserDetail();" class="btn btn-success bucket_quota_create">Modify</button>
+                    <button ng-click="userDelete_user()" class="btn btn-danger">Delete</button>
+                    <button class="btn btn-default" onclick="showOperation('user_detail', 'hide');">Cancel</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </ul>
+    <ul class="userDetail_Operation">
+        <li class="udo userDetail_add">
+            <table>
+                <tr>
+                    <td class="uds_first">user name ：</td>
+                    <td><input type="text" id="user_name" class="user_model" placeholder="user name"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">password ：</td>
+                    <td><input type="password" id="user_password" class="user_model" placeholder="password"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">email ：</td>
+                    <td><input type="text" id="user_email" class="user_model" placeholder="email"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">Roles ：</td>
+                    <td>
+                        <table>
+                            <tr ng-repeat="role in sfcsmRoles">
+                                <td>
+                                    <input type="radio" name="roles" class="user_model_cb roles" id="role_{{role}}">
+                                    <label class="role_label" for="role_{{role}}">{{role}}</label>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="uds_first">
+                        <button ng-click="userCreate_user()" class="btn btn-success">Create</button>
+                        <button class="btn btn-danger user_reset">Reset</button>
+                        <button class="btn btn-default" onclick="showOperation('userDetail_add', 'hide');">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </li>
+        <li class="udo userDetail_modify">
+            <table>
+                <tr>
+                    <td class="uds_first">user name ：</td>
+                    <td><input type="text" id="user_m_name" class="user_model_m" disabled="disabled"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">change password ：</td>
+                    <td><input type="checkbox" id="change_password" class="user_model_m_cb"></td>
+                </tr>
+                <tr class="isnewpwd">
+                    <td class="uds_first">new password ：</td>
+                    <td><input type="password" id="user_m_password" class="user_model_m" placeholder="password"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">email ：</td>
+                    <td><input type="text" id="user_m_email" class="user_model_m" placeholder="email"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">Roles ：</td>
+                    <td>
+                        <table>
+                            <tr ng-repeat="role in sfcsmRoles">
+                                <td>
+                                    <input type="radio" name="roles" class="user_model_m_cb roles" id="role_m_{{role}}">
+                                    <label class="role_label" for="role_m_{{role}}">{{role}}</label>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="uds_first">
+                        <button ng-click="userModify_user()" class="btn btn-success">Modify</button>
+                        <button ng-click="showRegLogUserDetail();" class="btn btn-danger">Reset</button>
+                        <button class="btn btn-default" onclick="showOperation('userDetail_modify', 'hide');">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    </ul>
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content usermanage_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

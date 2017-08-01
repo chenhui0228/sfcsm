@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>osd</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.osd_title{width:100%;margin:10px auto;}
+        .osd_title{height:28px;overflow:hidden;}
+        .osd_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .osd_title ul li{width:40%;list-style:none;}
+        .osd_title ul li:first-child{float:left;margin-left:15px;font-weight:bold;}
+        .osd_title ul li:last-child{width:30%;float:right;}
+        #osdlist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #osdlist tr td{border:1px solid #eee;font-size:15px;padding:12px;text-align:center;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .osd_oper a{width:21%;float:left;text-align:center;padding:5px;}
+        .osd_oper a{text-decoration:none;}
+        .osd_oper a div{background-color:#169BD5;border-radius:5px;height:23px;width:38px;line-height:23px;color:white;margin:0 auto;}
+        .circle {
+            width: 10px;
+            height: 10px;
+            background: red;
+            -moz-border-radius: 50px;
+            -webkit-border-radius: 50px;
+            border-radius: 50px;
+            margin:4px 8px 0px 8px;
+        }
+        .osd_right{overflow:hidden;}
+        .osd_right div{float:left;}
+        .osd_right .osd_right_div{width:85px;}
+        .a{background-color:#00FF66;}
+        .b{background-color:#FFBBBB;}
+        .c{background-color:#36A9CE;}
+        .d{background-color:#FF0000;}
+
+        .aa{color:#00FF66;}
+        .bb{color:#FFBBBB;}
+        .cc{color:#36A9CE;}
+        .dd{color:#FF0000;}
+        .modal-body ul li{list-style:none;float:left;margin-left:5px;cursor:pointer;margin-top:15px;}
+        .osd_state{width:auto;}
+        .osd_state input,.clu_state span{float:left;}
+        .osd_state span{cursor:pointer;}
+    </style>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="osd_title">
+    <ul>
+        <li>osd</li>
+        <li class="osd_right">
+            <div class="osd_right_div"><div class="circle a"></div><div class="aa">in/up</div></div>
+            <div class="osd_right_div"><div class="circle b"></div><div class="bb">in/down</div></div>
+            <div class="osd_right_div"><div class="circle c"></div><div class="cc">out/up</div></div>
+            <div class="osd_right_div"><div class="circle d"></div><div class="dd">out/down</div></div>
+        </li>
+    </ul>
+</div>
+<table id="osdlist" border="1px">
+    <thead>
+    <tr>
+        <td>partition</td>
+        <td>name</td>
+        <td>weight</td>
+        <td>hostname</td>
+        <td>state</td>
+        <td>osdid</td>
+        <td>mountpoint</td>
+        <td>hostip</td>
+        <td>Operation</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in OsdData">
+        <td>{{item.partition}}</td>
+        <td>{{item.name}}</td>
+        <td>{{item.weight}}</td>
+        <td>{{item.hostname}}</td>
+        <td class="{{(item.in == true && item.up == true) ? 'aa' :
+                    (item.in == true && item.up == false) ? 'bb' :
+                    (item.in == false && item.up == true) ?  'cc' : 'dd'}}">
+            {{item.in == true ? 'in' : 'out'}}/{{item.up == true ? 'up' : 'down'}}
+        </td>
+        <td>{{item.osdid}}</td>
+        <td>{{item.mountpoint}}</td>
+        <td>{{item.hostip}}</td>
+        <td class="osd_oper">
+            <a href="javascript:void(0);" ng-click="osdEnable(item, 'OP004')"><div class="osd_oper">启动</div></a>
+            <a href="javascript:void(0);" ng-click="osdEnable(item, 'OP003')"><div class="osd_oper">停止</div></a>
+            <a href="javascript:void(0);" ng-click="detailOsdOperation('myModalOsd', item)"><img src="../images/cluster/u345.png" title="编辑" height="20" width="20"/></a>
+            <a href="javascript:void(0);" ng-click="osdDel()" style="margin-left:-15px;"><img src="../images/osd/u1153.png" title="删除" height="20" width="20"/></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="modal fade" id="myModalOsd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li><label class="osd_state" for="rd_osd_in"><input type="radio" id="rd_osd_in" value="in" name="rd_osd"><span>in</span></label></li>
+                    <li><label class="osd_state" for="rd_osd_out"><input type="radio" id="rd_osd_out" value="out" name="rd_osd"><span>out</span></label></li>
+                    <li><label class="osd_state" for="rd_osd_down"><input type="radio" id="rd_osd_down" value="down" name="rd_osd"><span>down</span></label></li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content osd_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

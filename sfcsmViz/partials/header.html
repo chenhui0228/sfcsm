@@ -1,0 +1,77 @@
+<div id="page_header"  ng-controller="overallStatusCtrl">
+    <div id="page_logo" class="cephtitle">
+        <a href="index.html" title="{{ overallStatus.severity }}: {{ overallStatus.summary }}">
+            <img src="/sfcsmViz/img/sfcsm_logo.png" height="174" width="170"/>
+        </a>
+    </div>
+    <div id="page_title" class="cephtitle text_health_status_{{ overallStatus.severity }}">{{ pageTitle }}</div>
+    <div id="page_subtitle" class="cephtitle text_health_status_{{ overallStatus.severity }}">{{ conf.platform }}</div>
+    <div class="page_header_title" style="">
+        <ul>
+            <li>SFCSM</li>
+            <li>
+                <ul>
+                    <li><img src="../../sfcsmViz/images/dashboard/u27.png"/>容灾/生产</li>
+                    <li><a style="color: #FFFFFF" href="../../sfcsmViz/reglog.html">用户管理</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div id="page_menu">
+        <ul id="menu_cat_list" class="nav nav-pills">
+            <li class="dropdown">
+                <a href="/sfcsmViz/dashboard.html" class="page_title_menu">监控面板</a>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle page_title_menu" data-toggle="dropdown" href="javascript:void(0);">存储管理<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/sfcsmViz/storagemanage/cluster.html" title="hosts" class="page_title_menu">集群</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/monitor.html" title="cluster monitoring" class="page_title_menu">集群监控器</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/pool.html" title="cluster monitoring" class="page_title_menu">存储池</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/osd.html" title="cluster monitoring" class="page_title_menu">OSD</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/rgw.html" title="cluster monitoring" class="page_title_menu">对象网关</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/hardware.html" title="cluster monitoring" class="page_title_menu">硬件</a></li>
+                    <li><a href="/sfcsmViz/storagemanage/syslog.html" title="cluster monitoring" class="page_title_menu">系统日志</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle page_title_menu" data-toggle="dropdown" href="javascript:void(0);">存储服务<span class="caret"></span></a>
+                <ul  class="dropdown-menu">
+                    <li><a href="/sfcsmViz/storageservice/usermanage.html" title="hosts" class="page_title_menu">对象用户</a></li>
+                    <li><a href="/sfcsmViz/storageservice/bucketmanage.html" title="Cluster general flags" class="page_title_menu">存储桶</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle page_title_menu" data-toggle="dropdown" href="javascript:void(0);">状态分析<span class="caret"></span></a>
+                <ul id=""  class="dropdown-menu">
+                    <li><a href="/sfcsmViz/stateanalysis/capacity.html" title="hosts" class="page_title_menu">容量分析</a></li>
+                    <li><a href="/sfcsmViz/stateanalysis/qualities.html" title="Cluster general flags" class="page_title_menu">性能分析</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="/sfcsmViz/operationlog.html" class="page_title_menu">操作日志</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+<style>
+    #myModalTips{width:250px;position:absolute;z-index:9999;top:50%;left:50%;display:none;}
+</style>
+<div class="modal fade" id="myModalTips" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body tips_text">命令下发成功</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>

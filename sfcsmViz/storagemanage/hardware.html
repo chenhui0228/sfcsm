@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>hardware</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.hardware_title{width:100%;margin:10px auto;}
+        .hardware_title{height:28px;overflow:hidden;}
+        .hardware_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .hardware_title ul li{width:40%;list-style:none;}
+        .hardware_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .hardware_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #hardwarelist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #hardwarelist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .btn_close_style{opacity: 0.9;}
+        #myModal{width:80%;height:80%;display:none;left:30%;top:40%;}
+        .modal-body{min-height:500px;}
+        .hw_mb_ul{width:98%;height:auto;overflow:hidden;margin-left:0px;}
+        .hw_mb_ul li{list-style:none;float:left;padding:6px;margin-right:10px;cursor:pointer;border:1px solid #ddd;border-radius:3px;}
+        .hw_mb_ul li:hover{background-color:#eee;}
+        .hw_active{background-color:#eee;}
+        .mb_hw_div{display:none;margin-top:10px;width:100%;height:auto;overflow:hidden;}
+        .mb_hw_div table{wdith:100%;}
+        .mb_hw_div table thead{background-color:#eee;}
+        .mb_hw_div table thead tr td{font-size:18px;font-weight:bold;}
+        .mb_hw_div table tr td{border:1px solid #ddd;padding:10px;text-align:center;cursor:pointer;}
+        .mb_hw_div table tr:hover{background-color:rgba(218, 203, 203, 0.15);}
+        .hw_Detail_data td{width:70px;}
+    </style>
+    <script>
+        $(function(){
+            $(".hw_cpu_div").show();
+            $(".hw_mb_ul li").click(function(){
+                $(".hw_mb_ul li").removeClass('hw_active');
+                $(this).addClass('hw_active');
+                var className = $(this).attr('class').split(' ')[0];
+                $(".mb_hw_div").hide();
+                $("." + className + "_div").show();
+            });
+        });
+        function nic_detail(model){
+            var html = '';
+            $("#hardware_extand").html(html);
+            html += '<table>';
+
+            //通过controller来获取Angular应用
+            var appElement = document.querySelector('[ng-controller=statusCtrl]');
+            //获取$scope变量
+            var $scope = angular.element(appElement).scope();
+            var uri = "/sfcsmCtrl/S3/user/" + $scope.UsermanageDetail.user_id + "/caps" ;
+            var type = $(".capas_type").val();
+            var perm = $(".capas_perm").val();
+            $.ajax({method: "post", url: uri , data: "type="+type+"&perm="+perm, headers: {'Content-Type': 'application/x-www-form-urlencoded'} }).
+            success(function (data, status) {
+                CephAlert('add capability success');
+                $($(".udc_table_capability .adding")).remove();
+                //showUserDetail()方法及对应的变量
+                $scope.showUserDetail($scope.UserDetailModel, $scope.UserDetailEvent);
+            }).
+            error(function (data, status) {
+                CephAlert('add capability exception');
+            });
+
+
+
+            if(!isNullOrEmpty(model.stat.rx)) {
+                html += '<tr>';
+                html += '<td>bytes</td><td>errors</td><td>packets</td><td>dropped</td>';
+                html += '</tr>';
+                html += '<tr>';
+                html += '<td>' + model.stat.rx.bytes + '</td><td>' + model.stat.rx.errors + '</td><td>' + model.stat.rx.packets + '</td><td>' + model.stat.rx.dropped + '</td>';
+                html += '</tr>';
+            }
+            if(!isNullOrEmpty(model.stat.tx)) {
+                html += '<tr>';
+                html += '<td>bytes</td><td>errors</td><td>packets</td><td>dropped</td>';
+                html += '</tr>';
+                html += '<tr>';
+                html += '<td>' + model.stat.tx.bytes + '</td><td>' + model.stat.tx.errors + '</td><td>' + model.stat.tx.packets + '</td><td>' + model.stat.tx.dropped + '</td>';
+                html += '</tr>';
+            }
+            html += '</table>';
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="hardware_title">
+    <ul>
+        <li>hardware</li>
+        <li></li>
+    </ul>
+</div>
+<table id="hardwarelist" border="1px">
+    <thead>
+    <tr>
+        <td>Name</td>
+        <td>IP</td>
+        <td>用途</td>
+        <td>操作</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in HardwareData">
+        <td>{{item._id}}</td>
+        <td>{{item.hostip}}</td>
+        <td>{{item.type}}</td>
+        <td><a href="javascript:void(0);" ng-click="detailHWOperation('myModal', item)" style="margin-right:15px;">详情</a></td>
+    </tr>
+    </tbody>
+</table>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <ul class="hw_mb_ul">
+                    <li class="hw_cpu hw_tab hw_active">CPU</li>
+                    <li class="hw_memory hw_tab">内存</li>
+                    <li class="hw_swap hw_tab">交换分区</li>
+                    <li class="hw_nic hw_tab">网卡</li>
+                    <li class="hw_raidcards hw_tab">阵列卡列表</li>
+                    <li class="hw_disks hw_tab">物理磁盘列表</li>
+                    <li class="hw_partitions hw_tab">磁盘分区列表</li>
+                </ul>
+                <div class="hw_cpu_div mb_hw_div">
+                    <table>
+                        <thead>
+                            <tr>
+                            <td>system</td>
+                            <td>user</td>
+                            <td>idle</td>
+                            <td>guest_nice</td>
+                            <td>iowait</td>
+                            <td>softirq</td>
+                            <td>irq</td>
+                            <td>steal</td>
+                            <td>guest</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{cpuStatusDetail.system}}%</td>
+                                <td>{{cpuStatusDetail.user}}%</td>
+                                <td>{{cpuStatusDetail.idle}}%</td>
+                                <td>{{cpuStatusDetail.guest_nice}}%</td>
+                                <td>{{cpuStatusDetail.iowait}}%</td>
+                                <td>{{cpuStatusDetail.softirq}}%</td>
+                                <td>{{cpuStatusDetail.irq}}%</td>
+                                <td>{{cpuStatusDetail.steal}}%</td>
+                                <td>{{cpuStatusDetail.guest}}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_memory_div mb_hw_div">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td>total</td>
+                                <td>used</td>
+                                <td>cached</td>
+                                <td>free</td>
+                                <td>buffers</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{memStatusDetail.total|bytes}}</td>
+                                <td>{{memStatusDetail.used|bytes}}</td>
+                                <td>{{memStatusDetail.cached|bytes}}</td>
+                                <td>{{memStatusDetail.free|bytes}}</td>
+                                <td>{{memStatusDetail.buffers|bytes}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_swap_div mb_hw_div">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td>total</td>
+                                <td>free</td>
+                                <td>used</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{swapStatusDetail.total|bytes}}</td>
+                            <td>{{swapStatusDetail.free|bytes}}</td>
+                            <td>{{swapStatusDetail.used|bytes}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_nic_div mb_hw_div">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td>logical_name</td>
+                                <td>manufacturer</td>
+                                <td>HWaddr</td>
+                                <td>product</td>
+                                <td>Mask</td>
+                                <td>IP</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in nic" onclick="nic_detail(this)">
+                                <td>{{item.logical_name}}</td>
+                                <td>{{item.manufacturer}}</td>
+                                <td>{{item.HWaddr}}</td>
+                                <td>{{item.product}}</td>
+                                <td>{{item.inet.mask}}</td>
+                                <td>{{item.inet.addr}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_raidcards_div mb_hw_div">
+                    <table ng-if="raid.bbustat">
+                        <thead>
+                        <tr>
+                            <td>Product</td>
+                            <td>Manufacture date</td>
+                            <td>Memory size</td>
+                            <td>BBU HW Config</td>
+                            <td>BBU operation support</td>
+                            <td>BBU manufacture date</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in raid">
+                            <td>{{item.product}}</td>
+                            <td>{{item.manufacture_date}}</td>
+                            <td>{{item.memory_size}}</td>
+                            <td>{{item.bbu_hw_config}}</td>
+                            <td>{{item.bbu_operation_support}}</td>
+                            <td>{{item.bbu_date_of_manufacture}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table ng-if="!raid.bbustat">
+                        <thead>
+                        <tr>
+                            <td>product</td>
+                            <td>vender</td>
+                            <td>cache size</td>
+                            <td>sno</td>
+                            <td>cache sno</td>
+                            <td>battery/capacitor count</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in raid">
+                            <td>{{item.product}}</td>
+                            <td>{{item.vender}}</td>
+                            <td>{{item.cache_size}}</td>
+                            <td>{{item.serial_no}}</td>
+                            <td>{{item.cache_serial_no}}</td>
+                            <td>{{item.battery_capacitor_count}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_disks_div mb_hw_div">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>logical_name</td>
+                            <td>size</td>
+                            <td>raid_level</td>
+                            <td>disk_cache_policy</td>
+                            <td>current_access_policy</td>
+                            <td>current_cache_policy</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in disk">
+                            <td>{{ item.logical_name }}</td>
+                            <td>{{ item.size|bytes }}</td>
+                            <td>{{ item.raid_level }}</td>
+                            <td>{{ item.disk_cache_policy }}</td>
+                            <td>{{ item.current_access_policy }}</td>
+                            <td>{{ item.current_cache_policy }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="hw_partitions_div mb_hw_div">
+                    <table>
+                        <thead>
+                        <tr class="hw_th">
+                            <td>dev</td>
+                            <td>fs</td>
+                            <td>mountpoint</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-click="hw_Detail($event, item);" ng-repeat="item in part">
+                            <td>{{item.dev}}</td>
+                            <td>{{item.fs}}</td>
+                            <td>{{item.mountpoint}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+            <div id="hardware_extand" style="width:90%;min-height:100px;" title="扩展空间">
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content hardware_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

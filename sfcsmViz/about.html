@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ng-app="adminApp">
+<head>
+    <meta charset=utf-8 />
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-route.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/adminApp.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/d3/d3.v3.min.js"></script>
+    <script src="scripts/d3/common.js"></script>
+    <script src="scripts/d3/colorbrewer.js"></script>
+    <link rel="stylesheet" href="css/testAdmin.css" />
+    <link rel="stylesheet" href="css/tooltip.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="scripts/angular-misc/ng-table.min.css">
+    <title>About Sfcsm</title>
+    <style>
+        #aboutDiv {
+            border: thin solid lightgrey;
+            margin: 50px auto;
+            width:450px;
+            -moz-box-shadow: 10px 10px 10px 0px #c0c0c0;
+            -webkit-box-shadow: 10px 10px 10px 0px #c0c0c0;
+            -o-box-shadow: 10px 10px 10px 0px #c0c0c0;
+            box-shadow: 10px 10px 10px 0px #c0c0c0;
+            filter:progid:DXImageTransform.Microsoft.Shadow(color=#c0c0c0, Direction=134, Strength=10);
+        }
+        #aboutBody{
+            padding:20px;
+            background-color: lightgrey;
+        }
+    </style>
+</head>
+
+<body>
+
+<header id="header" ng-include src="'partials/header.html'" ng-init="pageTitle='About Sfcsm'"></header>
+
+<div id="aboutDiv">
+    <div id="aboutHeader">
+    <h1><img src="img/sfcsm_h_logo.png"> {{conf.version}}</h1>
+    </div>
+    <div id="aboutBody">
+        <strong>Sfcsm</strong> is a open-source initiative to provide a <a href="http://ceph.com/" target="_blank">Ceph</a> admin and supervision interface.
+        <br>
+        It is available on <a href="https://github.com/">GitHub</a> under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank"> Apache V2 license</a>.
+        <br><br>
+        Sfcsm resources :
+        <ul>
+            <li>Change log :  <a href="https://github.com/Sfcsm/Sfcsm/releases" target="_blank">https://github.com/Sfcsm/Sfcsm/releases</a></li>
+            <li>Sources :  <a href="https://github.com/Sfcsm/Sfcsm" target="_blank">https://github.com/Sfcsm/Sfcsm</a></li>
+            <li>Documentation :  <a href="https://github.com/Sfcsm/Sfcsm/wiki" target="_blank">https://github.com/Sfcsm/Sfcsm/wiki</a></li>
+            <li>Support :  <a href="https://github.com/Sfcsm/Sfcsm/issues" target="_blank">https://github.com/Sfcsm/Sfcsm/issues</a></li>
+            <li>Blog :  <a href="http://Sfcsm.blogspot.fr/" target="_blank">http://Sfcsm.blogspot.fr</a></li>
+        </ul>
+        Ceph resources :
+        <ul>
+            <li>Ceph website :  <a href="http://ceph.com/" target="_blank">http://ceph.com/</a></li>
+            <li>Ceph documentation :  <a href="http://docs.ceph.com/docs/master/" target="_blank">http://docs.ceph.com/docs/master/</a></li>
+            <li>Ceph releases :  <a href="http://docs.ceph.com/docs/master/releases/" target="_blank">http://docs.ceph.com/docs/master/releases/</a></li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

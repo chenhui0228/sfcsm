@@ -1,0 +1,148 @@
+<h3>Disk status for {{disk._id}} </h3>
+<br />
+<table class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <td width="80px">LD info：</td>
+        <td>
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <td style="border-top: 0; width: 120px">size</td>
+                    <td>{{ disk.size|bytes }}</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td style="border-top: 0">raid level</td>
+                    <td>{{ disk.raid_level }}</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td style="border-top: 0">disk cache policy</td>
+                    <td>{{ disk.disk_cache_policy }}</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td style="border-top: 0">access policy</td>
+                    <td>{{ disk.current_access_policy }}</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td style="border-top: 0">cache policy</td>
+                    <td>{{ disk.current_cache_policy }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td width="80px">PD info：</td>
+        <td>
+            <table class="table table-condensed table-nohead" ng-repeat="pd in disk.physical_disks">
+                <tr>
+                    <td colspan="2">
+                        <table class="table table-condensed table-nohead" style="margin: 0">
+                            <tr>
+                                <td>vender</td>
+                                <td>product</td>
+                                <td>serial number</td>
+                                <td>size</td>
+                                <td>media type</td>
+                            </tr>
+                            <tr style="border-top: 1px solid #dddddd">
+                                <td>{{ pd.vender }}</td>
+                                <td>{{ pd.product }}</td>
+                                <td>{{ pd.serial_number }}</td>
+                                <td>{{ pd.size|bytes }}</td>
+                                <td>{{ pd.media_type }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="80px">SMART：</td>
+                    <td>
+                        <table class="table table-condensed table-nohead">
+                            <tr>
+                                <td width="150px">Health status</td>
+                                <td>{{pd.smart.smart_health_status}}</td>
+                            </tr>
+                            <tr ng-if="pd.smart.power_on_hours">
+                                <td>Power on hours</td>
+                                <td>{{pd.smart.power_on_hours}} hours</td>
+                            </tr>
+                            <tr ng-if="pd.smart.read_error_rate">
+                                <td>Read error rate</td>
+                                <td>{{pd.smart.read_error_rate}}</td>
+                            </tr>
+                            <tr ng-if="pd.smart.write_error_rate">
+                                <td>Write error rate</td>
+                                <td>{{pd.smart.write_error_rate}}</td>
+                            </tr>
+                            <tr ng-if="pd.smart.non-medium_error_count">
+                                <td>Media wearout indicator</td>
+                                <td>{{pd.smart.media_wearout_indicator}}</td>
+                            </tr>
+                            <tr ng-if="pd.smart.non-medium_error_count">
+                                <td>Non-medium error count</td>
+                                <td>{{pd.smart.non-medium_error_count}}</td>
+                            </tr>
+                            <tr ng-if="pd.smart.read_total_errors_corrected">
+                                <td colspan="2">
+                                    <table class="table table-condensed table-nohead">
+                                        <tr>
+                                            <td width="60px"></td>
+                                            <td><br/>Err_ECC<br/>fast</td>
+                                            <td><br/>Err_ECC<br/>delayed</td>
+                                            <td><br/>rereads/<br/>rewrites</td>
+                                            <td>Total<br/>error<br/>corrected</td>
+                                            <td>Correction<br/>algorithm<br/>invocations</td>
+                                            <td>Gigabytes<br/>processed<br/>[10^9 bytes]</td>
+                                            <td>Total<br/>uncorrected<br/>errors</td>
+                                        </tr>
+                                        <tr>
+                                            <td>read：</td>
+                                            <td>{{pd.smart.read_errors_correct_ecc_fast}}</td>
+                                            <td>{{pd.smart.read_errors_correct_ecc_delayed}}</td>
+                                            <td>{{pd.smart.read_by_reread}}</td>
+                                            <td>{{pd.smart.read_total_errors_corrected}}</td>
+                                            <td>{{pd.smart.read_correction_algorithm_invocations}}</td>
+                                            <td>{{pd.smart.read_gigabytes_processed}}</td>
+                                            <td>{{pd.smart.read_total_uncorrected_errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>write：</td>
+                                            <td>{{pd.smart.write_errors_correct_ecc_fast}}</td>
+                                            <td>{{pd.smart.write_errors_correct_ecc_delayed}}</td>
+                                            <td>{{pd.smart.write_by_reread}}</td>
+                                            <td>{{pd.smart.write_total_errors_corrected}}</td>
+                                            <td>{{pd.smart.write_correction_algorithm_invocations}}</td>
+                                            <td>{{pd.smart.write_gigabytes_processed}}</td>
+                                            <td>{{pd.smart.write_total_uncorrected_errors}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>Status：</td>
+        <td>
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <td>rrqm/s</td>
+                    <td>wrqm/s</td>
+                    <td>r/s</td>
+                    <td>w/s</td>
+                    <td>rkB/s</td>
+                    <td>wkB/s</td>
+                </tr>
+                <tr>
+                    <td>{{disk.stat.rrqm_s}}</td>
+                    <td>{{disk.stat.wrqm_s}}</td>
+                    <td>{{disk.stat.r_s}}</td>
+                    <td>{{disk.stat.w_s}}</td>
+                    <td>{{disk.stat.rkB_s}}</td>
+                    <td>{{disk.stat.wkB_s}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

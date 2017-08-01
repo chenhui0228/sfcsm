@@ -1,0 +1,60 @@
+<h3>Image details for {{detailedImage.pool}}/{{detailedImage.name}}</h3>
+<br />
+
+<table  class="table table-condensed table-nohead">
+    <tbody>
+    <tr><td width="100px">Name</td> <td> {{ detailedImage.name }} </td></tr>
+    <tr><td>Pool</td> <td><a ng-click="showPoolDetail(detailedImage.pool)" class="clickable">{{ detailedImage.pool }}</a></td></tr>
+    <tr><td>Size</td> <td> {{ detailedImage.size |bytes }} </td></tr>
+    <tr><td>Objects</td> <td> {{ detailedImage.objects }} </td></tr>
+    <tr><td>Object size</td> <td> {{ detailedImage.object_size|bytes }} </td></tr>
+    <tr><td>Order</td> <td> {{ detailedImage.order }} </td></tr>
+    <tr><td>Block name prefix</td> <td> {{ detailedImage.block_name_prefix }} </td></tr>
+    <tr><td>Format</td> <td> {{ detailedImage.format }} </td></tr>
+    <tr ng-show=" ''+detailedImage.features!='' ">
+        <td>Features</td>
+        <td>
+            <table  class="table table-condensed table-nohead">
+                <tr ng-repeat="key in detailedImage.features">
+                    <td width="150px"> {{key.replace('_',' ', 'gi')}} </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr ng-show=" ''+detailedImage.parent!='' ">
+        <td>Parent</td>
+        <td>
+            <table  class="table table-condensed table-nohead">
+                <tr><td>Pool</td> <td>{{ detailedImage.parent.pool }}</td></tr>
+                <tr><td>Image</td> <td><a ng-click="showImageDetail(detailedImage.parent.image)">{{ detailedImage.parent.image }}</a> </td></tr>
+                <tr><td>Overlap</td> <td>{{ detailedImage.parent.overlap |bytes}}</td></tr>
+                <tr><td>Snapshot</td> <td><a href="#/snapshot/detail/{{detailedImage.parent.pool}}/{{detailedImage.parent.image}}/{{ detailedImage.parent.snapshot }}">{{ detailedImage.parent.snapshot }}</a></td></tr>
+            </table>
+        </td>
+    </tr>
+    <tr ng-show="detailedImage.snaps.length>0 ">
+        <td>Snapshots</td>
+        <td>
+            <table  class="table table-condensed">
+                <tr><td>Id</td><td>Name</td><td>Size</td></tr>
+                <tr ng-repeat="snapshot in detailedImage.snaps" ng-click="showSnapshotDetail(snapshot)" class="clickable">
+                    <td>{{ snapshot.id }}</td>
+                    <td><a href="#/snapshot/detail/{{detailedImage.pool}}/{{detailedImage.name}}/{{ snapshot.name }}">{{ snapshot.name }}</a></td>
+                    <td>{{ snapshot.size|bytes }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<div class="button-bar"  ng-show="hasRole('admin_rbd')">
+    <a href="#/snapshot/create/{{detailedImage.pool}}/{{detailedImage.name}}" class="btn btn-info" style="float:left;margin-right: 5px"><i class="icon-white icon-camera"></i> make snapshot </a>
+    <a ng-show=" ''+detailedImage.parent!='' " href="#/flatten/{{detailedImage.pool}}/{{detailedImage.name}}" class="btn btn-info" style="float:left;margin-right: 5px"> Flatten </a>
+    <a ng-show=" ''+detailedImage.snaps!='' " href="#/purge/{{detailedImage.pool}}/{{detailedImage.name}}" class="btn btn-info" style="float:left;margin-right: 5px"> Purge </a>
+    <a href="#/copy/{{ detailedImage.pool }}/{{ detailedImage.name }}" class="btn btn-success">Copy</a>
+    <a href="#/resize/{{ detailedImage.pool }}/{{ detailedImage.name }}" class="btn btn-success">Resize</a>
+    <button ng-disabled=" ''+detailedImage.snaps!='' " ng-click="showDeleteImage()" class="btn btn-danger">Delete</button>
+    <a href="#/" class="btn btn-default">Close</a>
+</div>

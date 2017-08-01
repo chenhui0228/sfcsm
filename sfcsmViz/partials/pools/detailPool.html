@@ -1,0 +1,40 @@
+<h3>Pool details for {{detailedPool.pool_name}}</h3>
+<br>
+<div ng-hide="detailedPool.clean">
+    <a href="pgStucks.html#/?poolId={{detailedPool.pool}}">
+        <p class="text-warning"> <i class="icon-warning-sign" ></i> This pool has stucked pgs</p>
+    </a><br>
+</div>
+<div class="button-bar"  ng-show="hasRole('admin')">
+    <a href="#/snapshot/{{detailedPool.pool}}/{{detailedPool.pool_name}}" class="btn btn-info" style="float:left"><i class="fa fa-camera"></i> make snapshot </a>
+    <div style="width:35px;display: inline-block"></div>
+    <a href="monitorPool.html#/pool/{{detailedPool.pool}}/{{detailedPool.pool_name}}" class="btn btn-info" ng-show="useInfluxDB"><i class="fa fa-line-chart"></i> Monitor</a>
+    <a href="#/modify/{{detailedPool.pool}}" class="btn btn-success">Modify</a>
+    <a href="#/delete/{{detailedPool.pool}}/{{detailedPool.pool_name}}" class="btn btn-danger" ng-class="(detailedPool.tier_of!=-1) || (detailedPool.tiers.length!=0) ? ['disabled','disabled_link']:''">Delete</a>
+    <a href="#/" class="btn btn-default">Close</a>
+    <br />
+    <div ng-show="(detailedPool.tier_of!=-1) || (detailedPool.tiers.length!=0)"><em>This pool can't be deleted while it participates to cache tiering</em><br></div>
+</div>
+<table ng-table="poolParams"  template-pagination="custom/pager" class="table table-condensed">
+    <thead><tr><th></th></tr></thead>
+    <tbody ng-repeat="group in $groups">
+    <tr class="ng-table-group" ng-init="checkGroup(group)">
+        <td colspan="{{$columns.length}}">
+            <a href="" ng-click="group.$hideRows = !group.$hideRows">
+                <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
+                <strong>{{ group.value }}</strong>
+            </a>
+        </td>
+    </tr>
+    <tr ng-hide="group.$hideRows" ng-repeat="parameter in group.data">
+        <td data-title="'Key'">
+            {{parameter.key}}
+        </td>
+        <td data-title="'Value'">
+            <span ng-bind-html="parameter.value"></span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- empty custom pager to avoid pager showing before being hidden -->
+<script type="text/ng-template" id="custom/pager"></script>

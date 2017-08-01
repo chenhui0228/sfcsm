@@ -1,0 +1,23 @@
+#!/usr/bin/python
+#@author eric Mourgaya
+# check  ceph health
+# import  the libmonjuice  from /opt/sfcsm/lib
+import os
+import sys
+LIBREP="/opt/sfcsm/lib/"
+LIBPATH=os.path.dirname(LIBREP)
+if LIBPATH not in sys.path:
+    sys.path.append(LIBPATH)
+from libmongojuice import *
+import sys
+
+res=ceph_df()
+
+if  res == 0:
+    print "ceph is not full ok"
+elif res == 1:
+    print "warning  something  wrong ceph is full: add new osd "
+else:
+    print "alert:  something really wrong add new osd !"
+sys.exit(res)
+

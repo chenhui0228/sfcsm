@@ -1,0 +1,39 @@
+#!/bin/sh
+# eric.mourgaya@arkea.com
+# Apache Licence
+### BEGIN INIT INFO
+# Default-Start:     3
+# Default-Stop:      0 1 6
+# Short-Description: Example initscript
+# Description:       This file should be used to construct scripts to be
+#                    placed in /etc/init.d.
+### END INIT INFO
+
+RETVAL=0
+PYTHONBIN=`which python`
+case "$1" in
+  start)
+    echo "Starting cephprob daemon"
+    $PYTHONBIN /opt/sfcsm/bin/cephprobe.py start
+    RETVAL=$?
+    ;;
+  stop)
+    echo "Stopping  cephprob daemon" 
+    $PYTHONBIN /opt/sfcsm/bin/cephprobe.py stop
+    ;;
+  restart)
+    echo "restarting  cephprob daemon" 
+    $PYTHONBIN /opt/sfcsm/bin/cephprobe.py restart
+    ;;
+  status)
+    echo "Status  cephprob daemon" 
+    $PYTHONBIN /opt/sfcsm/bin/cephprobe.py status
+    ;;
+  *)
+    echo "Usage: /etc/init.d/cephprob {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
+

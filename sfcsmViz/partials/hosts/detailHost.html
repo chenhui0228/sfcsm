@@ -1,0 +1,77 @@
+<div style="float: left;width:35%">
+<h3>Host details for {{detailedHost._id}}</h3>
+<br />
+
+<!--div class="button-bar">
+    <a href="#/snapshot/{{detailedHost.host}}/{{detailedHost.host_name}}" class="btn btn-info"><i class="icon-white icon-camera"></i> make snapshot </a>
+    <button ng-click="removeSnapshot()" class="btn btn-danger" ng-show="hasSnap"><i class="icon-white icon-camera"></i> remove snapshot </button>
+    <div style="width:35px;display: inline-block"></div>
+    <a href="#/modify/{{detailedHost.host}}" class="btn btn-success">Modify</a>
+    <a href="#/delete/{{detailedHost.host}}/{{detailedHost.host_name}}" class="btn btn-danger">Delete</a>
+    <a href="#/" class="btn btn-default">Close</a>
+</div>
+
+<br /><br /-->
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tbody>
+    <tr><td width="80px">Id</td>
+        <td> {{ detailedHost._id }} </td>
+    </tr>
+    <tr><td>IP</td>
+        <td> {{ detailedHost.hostip }} </td>
+    </tr>
+    <tr><td>CPU</td>
+        <td> <a style="cursor:pointer" ng-click="showCpuStatus(detailedHost._id)">详情</a> </td>
+    </tr>
+    <tr><td>Memory</td>
+        <td>
+            <a style="cursor: pointer" ng-click="showMemStatus(detailedHost._id)">详情</a> </td>
+        </td>
+    </tr>
+    <tr><td>Nic</td>
+        <td>
+            <table class="table table-condensed table-nohead" style="width: 100%">
+                <tr ng-repeat="trIndex in tr_nics">
+                    <td ng-repeat="tdIndex in td_base"><a style="cursor: pointer" ng-click="showNicStatus(detailedHost.network_interfaces[4*trIndex+tdIndex]._id)">{{ detailedHost.network_interfaces[4*trIndex+tdIndex].logical_name }}</a></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td>Swap</td>
+        <td> <a style="cursor:pointer" ng-click="showSwapStatus(detailedHost._id)">详情</a> </td>
+    </tr>
+    <tr><td>Disks</td>
+        <td>
+            <table class="table table-condensed table-nohead" style="width:100%">
+                <tr ng-repeat="trIndex in tr_disks">
+                    <td ng-repeat="tdIndex in td_base"><a style="cursor: pointer" ng-click="showDiskStatus(detailedHost.disks[4*trIndex+tdIndex]._id)">{{ detailedHost.disks[4*trIndex+tdIndex].logical_name }}</a></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td>RAID Cards</td>
+        <td>
+            <table class="table table-condensed table-nohead" style="width:100%">
+                <tr ng-repeat="trIndex in tr_raids">
+                    <td ng-repeat="tdIndex in td_base"><a style="cursor: pointer" ng-click="showRaidStatus(detailedHost.raids[4*trIndex+tdIndex]._id)">{{ detailedHost.raids[4*trIndex+tdIndex].product }}</a></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td >Partitions</td>
+        <td>
+            <table class="table table-condensed table-nohead" style="width:100%">
+                <tr ng-repeat="partition in detailedHost.partitions">
+                    <td><a style="cursor: pointer" ng-click="showPartitionStatus(partition._id)">{{ partition.dev }}</a></td>
+                    <td>{{ partition.fs }}</td>
+                    <td>{{ partition.mountpoint }}</td>
+                </tr>
+            </table>
+        </td></tr>
+    <!--tr ng-repeat="(key, value) in detailedHost">
+       <td width="150px"> {{key.replace('_',' ', 'gi')}} </td> <td> {{ value }} </td>
+   </tr-->
+    </tbody>
+</table>
+</div>
+<div ui-view class="mychart" style="float:left ;width: 60%; margin:0px; padding:0px; padding-left: 2rem"></div>

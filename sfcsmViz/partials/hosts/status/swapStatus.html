@@ -1,0 +1,14 @@
+<h3>Swap status for {{hostId}}</h3>
+<br />
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <th style="text-align: center">total</th>
+        <th style="text-align: center">free</th>
+        <th style="text-align: center">used</th>
+    </tr>
+    <tr>
+        <td style="text-align: center">{{swapStatusDetail.total|bytes}}</td>
+        <td style="text-align: center">{{swapStatusDetail.free|bytes}}</td>
+        <td style="text-align: center">{{swapStatusDetail.used|bytes}}</td>
+    </tr>
+</table>

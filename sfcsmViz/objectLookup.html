@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html ng-app="ObjectLookupApp">
+<head>
+    <meta charset="UTF-8"/>
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/objectLookupApp.js"></script>
+    <script src="scripts/d3/d3.v3.min.js"></script>
+    <script src="scripts/d3/common.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/tooltip.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/testAdmin.css">
+    <title>Object Lookup</title>
+</head>
+<body ng-controller="ObjectLookupCtrl">
+
+<header ng-include src="'partials/header.html'" ng-init="pageTitle='Ceph Object Lookup'"></header>
+
+    <div class="general_status">
+        <h2>Selection</h2>
+        <br>
+        Pool:
+        <select id="pool" ng-model="pool" ng-options="value.poolname for value in poolList| orderBy:'poolnum'"  ng-change="getPoolInfo(pool)"></select>
+        Object id:
+        <input type="text" ng-model="objectId_input" name="objectId_input" placeholder="object id">
+        &nbsp;
+        <button class="btn btn-success" style="padding: 4px;vertical-align: top;" ng-click="setObjectId()">look up</button>
+
+    </div>
+
+
+<div class="general_status">
+   <h3>Date : {{date | date:'HH:mm:ss'}}</h3>
+    <table><tr><td valign="top">
+        <table  class="table table-condensed" style="width:400px;align-self: center">
+            <tr><td>Pool</td><td>
+                <span ng-show="selectedPool">
+                    {{selectedPool.pool_name}} ({{selectedPool.pool}}), type: {{ getPoolType(selectedPool.type)}}, ruleset: {{ selectedPool.crush_ruleset }}, size: {{ selectedPool.size }}
+                </span>
+            </td></tr>
+            <tr><td>Object</td><td>{{objectId}}</td></tr>
+            <tr><td>PG</td><td>{{data.pgid}}</td></tr>
+            <tr><td>acting</td><td>{{data.acting}}</td></tr>
+            <tr><td>up</td><td>{{data.up}}</td></tr>
+        </table>
+        </td><td valign="top" style="padding-left: 20px">
+        <table class="table table-condensed" style="width:400px;align-self: center" ng-show="selectedRule">
+            <tr><td>Rule: </td><td>{{selectedRule.rule_name}} ({{selectedRule.rule_id}})</td></tr>
+            <tr><td>Type: </td><td>{{getPoolType(selectedRule.type)}} ({{selectedRule.type}})</td></tr>
+            <tr><td>Ruleset: </td><td>{{selectedRule.ruleset}}</td></tr>
+            <tr><td>Min size: </td><td>{{selectedRule.min_size}}</td></tr>
+            <tr><td>max size: </td><td>{{selectedRule.max_size}}</td></tr>
+            <tr><td>Steps:</td><td>
+                    <table class="table table-condensed table-nohead" style="width:100%">
+                        <tr ng-repeat="step in selectedRule.steps">
+                            <td>{{ prettifyStep(step) }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        </td></tr>
+    </table>
+
+   <div id="osds">
+        <h3>Acting OSD :</h3>
+        <div ng-repeat="osd in acting track by $index" class=" tooltips osd {{ osdClassForId(osd) }}" >
+            {{osd}}
+            <div ng-hide="osd==-1"> <!-- tooltip -->
+                <span>
+                    <strong>{{getOsd(osd).node.name}}</strong> {{osdState(osd)}}<br>
+                    last control : {{getOsd(osd).lastControl|duration}}<br><br>
+                    {{getOsd(osd).partition._id}}<br>
+                    {{getOsd(osd).public_addr}}<br>
+                    free : {{getOsd(osd).partition.stat.free|bytes}}<br>
+                    used : {{getOsd(osd).partition.stat.used|bytes}}<br>
+                    total: {{getOsd(osd).partition.stat.total|bytes}}<br>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

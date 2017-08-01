@@ -1,0 +1,95 @@
+<h3>RAID Cards status for {{raid._id}}</h3>
+<br />
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <td width="100px">Specification：</td>
+        <td>
+            <table class="table table-condensed table-nohead" ng-if="raid.bbustat">
+                <tr>
+                    <td>Product</td>
+                    <td>Manufacture date</td>
+                    <td>Memory size</td>
+                    <td>BBU HW Config</td>
+                    <td>BBU operation support</td>
+                    <td>BBU manufacture date</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td>{{raid.product}}</td>
+                    <td>{{raid.manufacture_date}}</td>
+                    <td>{{raid.memory_size}}</td>
+                    <td>{{raid.bbu_hw_config}}</td>
+                    <td>{{raid.bbu_operation_support}}</td>
+                    <td>{{raid.bbu_date_of_manufacture}}</td>
+                </tr>
+            </table>
+            <table class="table table-condensed table-nohead" ng-if="!raid.bbustat">
+                <tr>
+                    <td>vender</td>
+                    <td>product</td>
+                    <td>cache size</td>
+                    <td>sno</td>
+                    <td>cache sno</td>
+                    <td>battery/capacitor count</td>
+                </tr>
+                <tr style="border-top: 1px solid #dddddd">
+                    <td>{{raid.vender}}</td>
+                    <td>{{raid.product}}</td>
+                    <td>{{raid.cache_size}}</td>
+                    <td>{{raid.serial_no}}</td>
+                    <td>{{raid.cache_serial_no}}</td>
+                    <td>{{raid.battery_capacitor_count}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr ng-if="!raid.bbustat">
+        <td>Status：</td>
+        <td>
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <th width="150px" style="border-top: 0px solid #ffffff">Controller status</th>
+                    <td>{{raid.controller_status}}</td>
+                    <th width="150px" style="border-top: 0px solid #ffffff">Battery/Capacitor status</td>
+                    <td>{{raid.battery_capacitor_status}}</td>
+                </tr>
+                <tr>
+                    <th>Contorller temperature</th>
+                    <td>{{raid.contorller_temperature}} C</td>
+                    <th>Capacitor temperature</th>
+                    <td>{{raid.capacitor_temperature}} C</td>
+                </tr>
+                <tr>
+                    <th>Cache Temperature</th>
+                    <td>{{raid.cache_temperature}} C</td>
+                    <th>Cache size available</th>
+                    <td>{{raid.cache_size_available}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr ng-if="raid.bbustat">
+        <td>BBU Status：</td>
+        <td>
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <th width="150px" style="border-top: 0px solid #ffffff">Voltage</th>
+                    <td>{{raid.bbustat.bbu_voltage}}</td>
+                    <th width="150px" style="border-top: 0px solid #ffffff">Current</td>
+                    <td>{{raid.bbustat.bbu_current}}</td>
+                </tr>
+                <tr>
+                    <th>Temperature</th>
+                    <td>{{raid.bbustat.bbu_temperature}}</td>
+                    <th>Battery State</th>
+                    <td>{{raid.bbustat.bbu_battery_state}}</td>
+                </tr>
+                <tr>
+                    <th>Remaining Capacity</th>
+                    <td>{{raid.bbustat.bbu_remaining_capacity}}</td>
+                    <th>Full Charge Capacity</th>
+                    <td>{{raid.bbustat.bbu_full_charge_capacity}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

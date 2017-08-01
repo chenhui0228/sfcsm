@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+<link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css"/>
+<script src="scripts/jquery.min.js"></script>
+<script src="scripts/bootstrap.js"></script>
+<script src="scripts/angular/angular.min.js"></script>
+<head>
+    <meta charset=utf-8/>
+    <title>Ceph object</title>
+    <script>
+        var app = angular.module('testApp', []);
+        app.factory('dataService',function() {
+            var service = {};
+            service.cacheObj = {};
+            service.getAppName = function (appId, callback) {
+                if (service.cacheObj[appId]) {
+                    console.log('get name from cache');
+                    callback(service.cacheObj[appId]);
+                    return;
+                }
+                //here is sample. Always ajax.
+                service.cacheObj[appId] = 'QQ';
+                callback('QQ');
+            };
+            return service;
+        });
+        app.directive('myXopover', function (dataService) {
+            return {
+                restrict: 'AE',
+                link: function (scope, ele, attrs) {
+                    $(ele).data('title','test');
+                    $(ele).data('content', "<div id ='popDiv'>Name:-</div>");
+                    $(ele).popover({ html: true, trigger: 'hover'});
+                    $(ele).on('shown.bs.popover',function() {
+                        var popDiv = $('#popDiv');
+                        console.log(popDiv);
+                        dataService.getAppName('xxx',function(name) {
+                            $('#myModal').modal('toggle');
+                        });
+                    });
+                }
+            };
+        });
+        app.controller("test",function($scope) {
+        });
+    </script>
+</head>
+
+<div ng-app="testApp" style="width:100%;top:20%;left:20%;position:absolute;">
+    <div ng-controller="test">
+        <div>
+            <a my-xopover>app 1</a>
+            <a my-xopover>app 2</a>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        test detail
+    </div>
+</div>
+</body>
+</html>

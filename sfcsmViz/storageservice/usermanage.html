@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>usermanage</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.usermanage_title{width:100%;margin:10px auto;}
+        .usermanage_title{height:28px;overflow:hidden;}
+        .usermanage_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .usermanage_title ul li{width:40%;list-style:none;}
+        .usermanage_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .usermanage_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #usermanagelist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #usermanagelist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .usermanage_again{margin-top:-10px;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .btn_close_style{opacity: 0.9;}
+        .placement_num_style{color:red;margin-top:-10px;width:200px;}
+        #myModal{width:625px;}
+        .userlist,.udc_table{width:100%;height:auto;overflow:hidden;}
+        .userlist ul{float:left;margin-left:0px;margin-right:0px;overflow:hidden;}
+        .userlist ul li{list-style:none;padding:4px;}
+        .userlist .user_name{width:15%;}
+        .userlist .user_detail{width:83%;}
+        .userDetail_Operation li{list-style-type: none;}
+        .userlist .user_name li{border:1px solid #eee;border-bottom:none;padding:10px;text-align:center;cursor:pointer;}
+        .userlist .user_name li:last-child{border-bottom:1px solid #eee;}
+        .userlist .user_name li:hover{background-color:rgba(236 ,198, 198, 0.32);}
+        .userlist .user_detail table tr td{padding:4px;border:1px solid #eee;}
+        .bck{background-color:rgba(236 ,198, 198, 0.32);}
+        .uds_first{text-align:right;}
+        .uds_first label{margin-right:4px;float:right;}
+        .udo{display:none;}
+        .udc_table{border:0;}
+        .udc_table tr{border-bottom:1px solid #eee;}
+        .udc_table tr:last-child{border-bottom:0px;}
+        .udc_table tr td{padding:5px;}
+        .ud_detail_table table{width:100%;}
+        .click_style_1{background-color: rgba(236 ,198, 198, 0.32);}
+        .userDetail_add table tr td{padding:2px;}
+        .sud_model{float:left;}
+        .user_detail table tr:hover{background-color:#f5f5f5;}
+        .iss3key,.isswiftsubuser,.isswiftkey{display:none;}
+        .userDetail_Operation{width:95%;}
+    </style>
+    <script>
+        $(function(){
+            $(".users").click(function(){
+                $(".users").removeClass('bck');
+                $(this).addClass('bck');
+            });
+            //S3Keys
+            {
+                $(".s3Keys_model_cb").click(function () {
+                    if (!$(this).is(":checked")) {
+                        $(".s3Keys_model").attr('disabled', false);
+                        $(".s3Keys_create").attr('disabled', true);
+                    } else {
+                        $(".s3Keys_model").attr('disabled', true);
+                        $(".s3Keys_create").attr('disabled', false);
+                    }
+                });
+                $(".s3Keys_reset").click(function () {
+                    $(".s3Keys_model").val('');
+                    $(".s3Keys_create").attr('disabled', true);
+                });
+                $(".s3Keys_model").keyup(function () {
+                    var models = $(".s3Keys_model");
+                    var isDisable = true;
+                    $.each(models, function () {
+                        var values = $(this).val();
+                        if (isNullOrEmpty(values))
+                            isDisable = false;
+                    });
+                    if (isDisable)
+                        $(".s3Keys_create").attr('disabled', false);
+                    else
+                        $(".s3Keys_create").attr('disabled', true);
+                });
+            }
+            //sub users
+            {
+                $(".sub_model_cb").click(function () {
+                    $("#swift_key").val('');
+                    $(".sub_create").attr('disabled', true);
+                    if (!$(this).is(":checked")) {
+                        $("#swift_key").attr('disabled', false);
+                    } else {
+                        $("#swift_key").attr('disabled', true);
+                    }
+                    subUsers();
+                });
+                $(".sub_uds_model_swift_cb").click(function () {
+                    $(".sub_uds_model").val('');
+                    $(".sub_uds_swiftkey_create").attr('disabled', true);
+                    if (!$(this).is(":checked")) {
+                        $(".sub_uds_model").attr('disabled', false);
+                    } else {
+                        $(".sub_uds_model").attr('disabled', true);
+                    }
+                    $(".sub_uds_swiftkey_create").attr('disabled', true);
+                });
+                $(".sub_reset,.sub_uds_swiftkey_reset").click(function () {
+                    $(".sub_model,.sub_uds_model").val('');
+                    $(".sub_create,.sub_uds_swiftkey_create").attr('disabled', true);
+                });
+                $(".sub_model").keyup(function(){
+                    subUsers();
+                });
+                $(".sub_uds_model").keyup(function(){
+                    if(isNullOrEmpty($(this).val()))
+                        $(".sub_uds_swiftkey_create").attr('disabled', true);
+                    else
+                        $(".sub_uds_swiftkey_create").attr('disabled', false);
+                });
+            }
+            //user detail
+            {
+                $(".udm_model").keyup(function () {
+                    checkOldData();
+                });
+                $("#suspended").change(function(){
+                    checkOldData();
+                });
+            }
+            //quota qos
+            {
+                $(".bucket_quota_reset").click(function () {
+                    $(".bucket_model").prop('disabled', 'disabled').val('');
+                    $(".bucket_model_enable").prop('checked', false);
+                });
+                $(".user_quota_reset").click(function () {
+                    $(".user_quota_model").prop('disabled', 'disabled').val('');
+                    $(".user_quota_model_enable").prop('checked', false);
+                });
+                $(".qos_reset").click(function () {
+                    $(".qos_model").prop('disabled', 'disabled').val('');
+                    $(".qos_model_enable").prop('checked', false);
+                });
+            }
+            //add user
+            {
+                $("#add_generate_key").change(function(){
+                    if(!$(this).is(":checked")) {
+                        $(".add_generate_key").prop('disabled', false);
+                        $(".iss3key").show();
+                    }else {
+                        $(".add_generate_key").prop('disabled', true);
+                        $(".iss3key").hide();
+                    }
+                });
+                $("#add_create_swift_subuser").change(function(){
+                    if($(this).is(":checked")) {
+                        $(".add_create_swift_subuser").prop('disabled', false);
+                        $(".isswiftsubuser").show();
+                        $(".isswiftkey").hide();
+                    }else {
+                        $(".add_create_swift_subuser").prop('disabled', true);
+                        $(".isswiftsubuser").hide();
+                    }
+                });
+                $("#add_subuser_generate_key").change(function(){
+                    if(!$(this).is(":checked")) {
+                        $(".add_subuser_generate_key").prop('disabled', false);
+                        $(".isswiftkey").show();
+                    }else {
+                        $(".add_subuser_generate_key").prop('disabled', true);
+                        $(".isswiftkey").hide();
+                    }
+                });
+                $(".add_model_reset").click(function(){
+                    $(".add_model").val('');
+                    $("#add_generate_key,#add_subuser_generate_key").prop('checked', true);
+                    $("#add_create_swift_subuser,#add_suspended").prop('checked', false);
+                    $(".add_generate_key,.add_create_swift_subuser,.add_subuser_generate_key").prop('disabled', 'disabled');
+                });
+            }
+            $.each($('.udo_detail_table tr'), function(){
+                $(this).find("td:first").css('width', '170px');
+                $(this).find("td:last").find("button:last").css('display', 'none');
+                $(this).find("label").css('width', '165px');
+            });
+        });
+        function subUsers(){
+            var isDisable = true;
+            $.each($(".sub_model"), function () {
+                var values = $(this).val();
+                if($(this).attr('id') == 'swift_key'){
+                    if (!$(".sub_model_cb").is(":checked")) {
+                        if(isNullOrEmpty(values))
+                            isDisable = false;
+                    }
+                }else {
+                    if (isNullOrEmpty(values))
+                        isDisable = false;
+                }
+            });
+            if (isDisable)
+                $(".sub_create").attr('disabled', false);
+            else
+                $(".sub_create").attr('disabled', true);
+
+        }
+        function showOperation(obj, type){
+            $("#myModalUserManage").modal('show');
+            if(obj == 'userDetail_add'){
+                $(".user_detail,.iss3key,.isswiftsubuser,.isswiftkey").hide();
+                $("#add_generate_key,#add_subuser_generate_key").prop('checked', true);
+                $("#add_create_swift_subuser,#add_suspended").prop('checked', false);
+                $(".add_generate_key,.add_create_swift_subuser,.add_subuser_generate_key").prop('disabled', 'disabled');
+            }
+            $(".udo").hide();
+            $(".s3Keys_model,.sub_model,.sub_uds_model,.add_model,.bucket_model,.user_quota_model,.qos_model").val('');
+            $(".s3Keys_model,#swift_key,.sub_uds_model").prop('disabled', 'disabled');
+            $(".s3Keys_model_cb,.sub_model_cb,.sub_uds_model_swift_cb").prop('checked', true).prop('disabled', false);
+            $(".s3Keys_create,.sub_create").attr('disabled', false);
+            $(".bucket_model_enable,.user_quota_model_enable,.qos_model_enable").prop('checked', false);
+            $($(".udc_table_capability .adding")).remove();
+
+            if(obj == 'userDetail_bucket_quota' || obj == 'userDetail_user_quota' || obj == 'userDetail_qos'){
+                //通过controller来获取Angular应用
+                var appElement = document.querySelector('[ng-controller=statusCtrl]');
+                //获取$scope变量
+                var $scope = angular.element(appElement).scope();
+
+                var _data = $scope.UsermanageDetail;
+
+                if (obj == 'userDetail_bucket_quota' && !isNullOrEmpty(_data.bucket_quota)) {
+                    $.each($(".userDetail_bucket_quota input"), function(){
+                        var $html = $(this);
+                        var id = $html.attr('id').replace('bucket_', '');
+                        $.each(_data.bucket_quota, function (key, value) {
+                            if(id == key) {
+                                if($html.attr("type") == 'checkbox')
+                                    $($html).prop('checked', value);
+                                else
+                                    $($html).val(value);
+                            }
+                        });
+                    });
+                }
+
+                if (obj == 'userDetail_user_quota' && !isNullOrEmpty(_data.user_quota)) {
+                    $.each($(".userDetail_user_quota input"), function(){
+                        var $html = $(this);
+                        var id = $html.attr('id').replace('user_quota_', '');
+                        $.each(_data.user_quota, function (key, value) {
+                            if(id == key) {
+                                if($html.attr("type") == 'checkbox')
+                                    $($html).prop('checked', value);
+                                else
+                                    $($html).val(value);
+                            }
+                        });
+                    });
+                }
+
+                if (obj == 'userDetail_qos' && !isNullOrEmpty(_data.qos)) {
+                    $.each($(".userDetail_qos input"), function(){
+                        var $html = $(this);
+                        var id = $html.attr('id').replace('qos_', '');
+                        $.each(_data.qos, function (key, value) {
+                            if(id == key) {
+                                if($html.attr("type") == 'checkbox')
+                                    $($html).prop('checked', value);
+                                else
+                                    $($html).val(value);
+                            }
+                        });
+                    });
+                }
+
+            }
+
+            if(isNullOrEmpty(type))
+                $("." + obj).show();
+            else $("." + obj).hide();
+        }
+        function addCapAbility(){
+            $($(".udc_table_capability .adding")).remove();
+            if(!$(".udc_table_capability tr").is('.adding')) {
+                var html = '<tr ng-show="adding" class="adding">' +
+                    '<td>' +
+                    '<select class="ng-pristine ng-valid capas_type" style="width:107px">' +
+                    '<option value="?"></option>' +
+                    '<option value="bilog">bilog</option>' +
+                    '<option value="buckets">buckets</option>' +
+                    '<option value="mdlog">mdlog</option>' +
+                    '<option value="metadata">metadata</option>' +
+                    '<option value="opstate">opstate</option>' +
+                    '<option value="users">users</option></select>' +
+                    '</td>' +
+                    '<td>' +
+                    '<select style="width:107px" class="ng-pristine ng-valid capas_perm">' +
+                    '<option value="?"></option>' +
+                    '<option value="read">read</option>' +
+                    '<option value="write">write</option>' +
+                    '<option value="*">*</option></select>' +
+                    '</td>' +
+                    '<td>' +
+                    '<a href="javascript:void(0);" onclick="saveCapability();"><i class="icon-ok " alt="save capability" title="save capability"></i></a>' +
+                    '</td>' +
+                    '<td>' +
+                    '<a href="javascrip:void(0);" onclick="cancelCapability()"><i class="icon-remove closeButton" alt="cancel" title="cancel"></i></a>' +
+                    '</td>' +
+                    '</tr>';
+                $(".udc_table_capability tr:eq(0)").after(html);
+            }
+        }
+        function saveCapability(){
+            //通过controller来获取Angular应用
+            var appElement = document.querySelector('[ng-controller=statusCtrl]');
+            //获取$scope变量
+            var $scope = angular.element(appElement).scope();
+            var uri = "/sfcsmCtrl/S3/user/" + $scope.UsermanageDetail.user_id + "/caps" ;
+            var type = $(".capas_type").val();
+            var perm = $(".capas_perm").val();
+            $.ajax({method: "post", url: uri , data: "type="+type+"&perm="+perm, headers: {'Content-Type': 'application/x-www-form-urlencoded'} }).
+            success(function (data, status) {
+                CephAlert('add capability success');
+                $($(".udc_table_capability .adding")).remove();
+                //showUserDetail()方法及对应的变量
+                $scope.showUserDetail($scope.UserDetailModel, $scope.UserDetailEvent);
+            }).
+            error(function (data, status) {
+                CephAlert('add capability exception');
+            });
+        }
+        function cancelCapability(){
+            $($(".udc_table_capability .adding")).remove();
+        }
+        function checkOldData(){
+            var isDisabled = true;
+            $.each($('.udm_models'), function(){
+                var $model = $(this);
+                var udikey = $model.attr('udikey');
+                $.each($(".udm_model"), function(){
+                    var id = $(this).attr('id');
+                    var value = $(this).val();
+                    if(id == 'suspended' && udikey == 'suspended'){
+                        if($(this).is(":checked") != $model.is(":checked"))
+                            isDisabled = false;
+                    }else {
+                        if(id == 'max_buckets' && udikey == 'max_buckets'){
+                            if($model.html() != value)
+                                isDisabled = false;
+                        }else {
+                            if (udikey == id && $model.html() != value)
+                                isDisabled = false;
+                        }
+                    }
+                });
+            });
+            $(".udm_model_modify,.udm_model_reset").prop('disabled', isDisabled);
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="usermanage_title">
+    <ul>
+        <li>usermanage</li>
+        <li></li>
+    </ul>
+</div>
+<div style="padding:0 0 5px 15px;">
+    new user
+    <a href="javascript:void(0);" onclick="showOperation('userDetail_add')">
+        <i class="icon-plus-sign" alt="add a new user" title="add a new user"></i>
+    </a>
+</div>
+<div class="userlist">
+    <ul class="user_name">
+        <li class="users" ng-repeat="item in UsermanageData" ng-click="showUserDetail(item,$event)">{{item.display_name}}</li>
+    </ul>
+    <ul class="user_detail hide">
+        <table class="udo_detail_table" style="margin-left:5px;width:98%;">
+            <tr>
+                <td>user_id</td>
+                <td class="udm_models" udikey="uid">{{UsermanageDetail.user_id}}</td>
+            </tr>
+            <tr>
+                <td>display_name</td>
+                <td class="udm_models" udikey="display_name">{{UsermanageDetail.display_name}}</td>
+            </tr>
+            <tr>
+                <td>email</td>
+                <td class="udm_models" udikey="email">{{UsermanageDetail.email}}</td>
+            </tr>
+            <tr>
+                <td>suspended</td>
+                <td>
+                    <input type="checkbox" ng-model="UsermanageDetail_suspended" disabled="disabled" ng-true-value="true" ng-false-value="false" class="udm_models" udikey="suspended">
+                </td>
+            </tr>
+            <tr>
+                <td>max_buckets</td>
+                <td class="udm_models" udikey="max_buckets">{{UsermanageDetail.max_buckets}}</td>
+            </tr>
+            <tr>
+                <td>S3 Keys</td>
+                <td class="ud_detail_table">
+                    <a onclick="showOperation('userDetail_s3Keys');"><i class="icon-plus-sign" alt="add key" title="add key"></i></a>
+                    <table>
+                        <tr ng-repeat="key in UsermanageDetail.keys">
+                            <td>{{key.user}}</td>
+                            <td>{{key.access_key}}<br><span ng-show="hasRole('admin_rgw')">{{key.secret_key}}</span></td>
+                            <td width="20"><a ng-click="removeKey(key.access_key)"><i class="icon-remove closeButton" alt="remove key" title="remove key"></i></a></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>subusers</td>
+                <td class="ud_detail_table">
+                    <a onclick="showOperation('userDetail_subusers_create');"><i class="icon-plus-sign" alt="add key" title="add key"></i></a>
+                    <table>
+                        <tr ng-repeat="subuser in UsermanageDetail.subusers">
+                            <td>{{subuser.id}}</td>
+                            <td>{{subuser.permissions}}</td>
+                            <td width="40">
+                                <a ng-click="removeSubuser(subuser.id)"><i class="icon-remove closeButton" alt="remove subuser" title="remove subuser"></i></a>
+                                <a ng-click="showSwiftkey(subuser);"><i class="icon-bookmark closeButton" alt="add swift key" title="add swift key"></i></a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>Swift Keys</td>
+                <td class="ud_detail_table">
+                    <table>
+                        <tr ng-repeat="key in UsermanageDetail.swift_keys">
+                            <td>{{key.user}}</td>
+                            <td ng-show="hasRole('admin_rgw')">{{key.secret_key}}</td>
+                            <td width="20" ng-show="hasRole('admin_rgw')"><a ng-click="removeSwiftKey(key.user,key.secret_key)"><i class="icon-remove closeButton" alt="remove key" title="remove key"></i></a></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>caps</td>
+                <td class="ud_detail_table">
+                    <a style="float: left;" onclick="showOperation('userDetail_caps');"><i class="icon-edit closeButton" alt="edit capabilities" title="edit capabilities"></i></a>
+                    <table class="udc_table">
+                        <tr ng-repeat="caps in UsermanageDetail.caps">
+                            <td>{{caps.type}}</td>
+                            <td>{{caps.perm}}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>op_mask</td>
+                <td>{{UsermanageDetail.op_mask}}</td>
+            </tr>
+            <tr>
+                <td>bucket_quota</td>
+                <td class="ud_detail_table">
+                    <a class="bucket_quota sud_model" onclick="showOperation('userDetail_bucket_quota');"><i class="icon-edit closeButton" alt="edit bucket_quota" title="edit bucket_quota"></i></a>
+                    <table ng-bind-html="UsermanageDetail_bucket_quota"></table>
+                </td>
+            </tr>
+            <tr>
+                <td>user_quota</td>
+                <td class="ud_detail_table">
+                    <a class="user_quota sud_model" onclick="showOperation('userDetail_user_quota');"><i class="icon-edit closeButton" alt="edit user_quota" title="edit user_quota"></i></a>
+                    <table ng-bind-html="UsermanageDetail_user_quota"></table>
+                </td>
+            </tr>
+            <tr>
+                <td>qos</td>
+                <td class="ud_detail_table">
+                    <a class="qos sud_model" onclick="showOperation('userDetail_qos');"><i class="icon-edit closeButton" alt="edit qos" title="edit qos"></i></a>
+                    <table ng-bind-html="UsermanageDetail_qos"></table>
+                </td>
+            </tr>
+            <tr>
+               <td colspan="2" class="uds_first">
+                   <button ng-click="showUserManage()" class="btn btn-success sub_uds_swiftkey_create">Modify</button>
+                   <button ng-click="userDelete()" class="btn btn-danger">Delete</button>
+                   <button class="btn btn-default" onclick="showOperation('user_detail', 'hide');">Cancel</button>
+               </td>
+            </tr>
+        </table>
+    </ul>
+</div>
+<div class="modal fade" id="myModalUserManage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <ul class="userDetail_Operation">
+                    <li class="udo userDetail_s3Keys">
+                        <table class="udo_detail_table">
+                            <tr>
+                                <td class="uds_first"><label for="generate_key" style="width:130px;" class="col-sm-2 control-label">generate new S3 key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=checkbox id="generate_key" class="s3Keys_model_cb"/>
+                                        &nbsp;<a class="tooltips" title="Generate a new key pair and add to the existing keyring."><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="access_key" class="col-sm-2 control-label">access key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=text id="access_key" class="s3Keys_model"/>
+                                        &nbsp;<a class="tooltips" title="user access key"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="secret_key" class="col-sm-2 control-label">secret key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=text id="secret_key" class="s3Keys_model"/>
+                                        &nbsp;<a class="tooltips" title="user secret key"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="createKey()" class="btn btn-success s3Keys_create">Create</button>
+                                    <button class="btn btn-default s3Keys_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_s3Keys', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="userDetail_subusers">
+                        <table class="udo userDetail_subusers_create udo_detail_table">
+                            <tr>
+                                <td class="uds_first"><label for="subuser_id" class="col-sm-2 control-label">subuser id : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=text id="subuser_id" class="sub_model"/>
+                                        &nbsp;<a class="tooltips" title="subuser id"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="permission" class="col-sm-2 control-label">permission : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <select id="permission" class="ng-pristine ng-valid sub_model_sel">
+                                            <option value="read">read</option>
+                                            <option value="write">write</option>
+                                            <option value="readwrite">readwrite</option>
+                                            <option value="full">full</option>
+                                        </select>
+                                        &nbsp;<a class="tooltips" title="set access permission for subuser"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="generate_swift_key" style="width:130px;" class="col-sm-2 control-label">generate swift key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=checkbox id="generate_swift_key" class="sub_model_cb"/>
+                                        &nbsp;<a class="tooltips" title="Generate a new Swift key and add to the existing keyring."><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="swift_key" class="col-sm-2 control-label">swift key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=text id="swift_key" class="sub_model"/>
+                                        &nbsp;<a class="tooltips" title="subuser swift key"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="createSubuser()" class="btn btn-success sub_create">Create</button>
+                                    <button class="btn btn-default sub_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_subusers_create', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="udo userDetail_subusers_swiftkey udo_detail_table">
+                            <tr>
+                                <td class="uds_first"><label for="generate_swift_key_create" style="width:130px;" class="col-sm-2 control-label">generate swift key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=checkbox id="generate_swift_key_create" class="sub_uds_model_swift_cb"/>
+                                        &nbsp;<a class="tooltips" title="Generate a new Swift key and add to the existing keyring."><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first"><label for="uds_swift_key" class="col-sm-2 control-label">swift key : </label></td>
+                                <td>
+                                    <div class="controls">
+                                        <input type=text id="uds_swift_key" class="sub_uds_model"/>
+                                        &nbsp;<a class="tooltips" title="subuser swift key"><i class="icon-book"> </i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="createSwiftKey()" class="btn btn-success sub_uds_swiftkey_create">Create</button>
+                                    <button class="btn btn-default sub_uds_swiftkey_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_subusers_swiftkey', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_caps">
+                        <table class="udc_table udc_table_capability udo_detail_table">
+                            <tr>
+                                <td colspan="4">
+                                    <strong>add capability </strong>
+                                    <a onclick="addCapAbility()">
+                                        <i class="icon-plus-sign" alt="add capability" title="add capability"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="caps in UsermanageDetail.caps">
+                                <td>{{caps.type}}</td>
+                                <td>{{caps.perm}}</td>
+                                <td colspan="2">
+                                    <a ng-click="deleteCapability(caps.type,caps.perm)">
+                                        <i class="icon-remove closeButton" alt="remove capability" title="remove capability"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="uds_first">
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_caps', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_bucket_quota">
+                        <table class="udo_detail_table">
+                            <tr>
+                                <td class="uds_first">enabled ：</td>
+                                <td><input type="checkbox" id="bucket_enabled" class="bucket_model_enable"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max_objects ：</td>
+                                <td><input type="text" id="bucket_max_objects" class="bucket_model"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max_size_kb ：</td>
+                                <td><input type="text" id="bucket_max_size_kb" class="bucket_model"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="modifyQuota('bucket_model','bucket');" class="btn btn-success bucket_quota_create">Modify</button>
+                                    <button class="btn btn-default bucket_quota_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_bucket_quota', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_user_quota">
+                        <table class="udo_detail_table">
+                            <tr>
+                                <td class="uds_first">enabled ：</td>
+                                <td><input type="checkbox" id="user_quota_enabled" class="user_quota_model_enable"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max_objects ：</td>
+                                <td><input type="text" id="user_quota_max_objects" class="user_quota_model"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max_size_kb ：</td>
+                                <td><input type="text" id="user_quota_max_size_kb" class="user_quota_model"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="modifyQuota('user_quota_model','user');" class="btn btn-success user_quota_create">Modify</button>
+                                    <button class="btn btn-default user_quota_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_user_quota', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_qos">
+                        <table class="udo_detail_table">
+                            <tr>
+                                <td class="uds_first">enabled ：</td>
+                                <td><input type="checkbox" id="qos_enabled" class="qos_model_enable"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">read_iops_limit ：</td>
+                                <td><input type="text" id="qos_read_iops_limit" class="qos_model"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">write_iops_limit ：</td>
+                                <td><input type="text" id="qos_write_iops_limit" class="qos_model"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">iops_limit ：</td>
+                                <td><input type="text" id="qos_iops_limit" class="qos_model"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="modifyQos();" class="btn btn-success qos_create">Modify</button>
+                                    <button class="btn btn-default qos_reset">Reset</button>
+                                    <button class="btn btn-default" onclick="showOperation('userDetail_qos', 'hide');">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_modify">
+                        <table class="udc_table_usermanage udo_detail_table">
+                            <tr>
+                                <td class="uds_first">user ID ：</td>
+                                <td><input type="text" id="uid" placeholder="uid" disabled="disabled" class="udm_model ng-pristine ng-valid"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">display name ：</td>
+                                <td>
+                                    <input type="text" id="display_name" placeholder="display_name" class="udm_model ng-pristine ng-valid">
+                                    <a class="tooltips" title="user name you want to be displayed"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">email ：</td>
+                                <td><input type="text" id="email" placeholder="email" class="udm_model ng-pristine ng-valid"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">Suspended ：</td>
+                                <td>
+                                    <input type="checkbox" id="suspended" class="udm_model ng-valid ng-dirty">
+                                    <a class="tooltips" title="Specify whether the user should be suspended Example: False [False]"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max-buckets ：</td>
+                                <td>
+                                    <input type="text" id="max_buckets" placeholder="max_buckets" onkeyup="this.value=this.value.replace(/[^0-9-]+/,'');" class="udm_model ng-pristine ng-valid">
+                                    <a class="tooltips" title="Specify the maximum number of buckets the user can own"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="uds_first">
+                                    <button ng-click="modifyUserManage()" class="btn btn-success udm_model_modify">Modify</button>
+                                    <button class="btn btn-default udm_model_reset">Reset</button>
+                                    <button onclick="showOperation('userDetail_modify', 'hide')" class="btn btn-default">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li class="udo userDetail_add">
+                        <table class="udo_detail_table">
+                            <tr>
+                                <td class="uds_first">user ID ：</td>
+                                <td><input type="text" id="add_uid" class="add_model" placeholder="uid"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">display name ：</td>
+                                <td>
+                                    <input type="text" id="add_display_name" class="add_model" placeholder="display_name">
+                                    <a class="tooltips" title="user name you want to be displayed"><i class="icon-book"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">email ：</td>
+                                <td><input type="text" id="add_email" class="add_model" placeholder="email"></td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">Suspended ：</td>
+                                <td>
+                                    <input type="checkbox" id="add_suspended" class="add_model" placeholder="Suspended">
+                                    <a class="tooltips" title="Specify whether the user should be suspended Example: False [False]"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">max-buckets ：</td>
+                                <td>
+                                    <input type="text" id="add_max_buckets" placeholder="max_buckets" onkeyup="this.value=this.value.replace(/[^0-9-]+/,'');" class="add_model">
+                                    <a class="tooltips" title="Specify the maximum number of buckets the user can own"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">generate s3 key ：</td>
+                                <td>
+                                    <input type="checkbox" id="add_generate_key" class="add_model" checked="checked">
+                                    <a class="tooltips" title="Generate a new key pair and add to the existing keyring."><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr class="iss3key">
+                                <td class="uds_first">access key ：</td>
+                                <td>
+                                    <input type="text" id="add_access_key" class="add_model add_generate_key" placeholder="access_key" disabled="disabled">
+                                    <a class="tooltips" title="user access key"><i class="icon-book"></i></a>
+                                </td>
+                            </tr>
+                            <tr class="iss3key">
+                                <td class="uds_first">secret key ：</td>
+                                <td>
+                                    <input type="text" id="add_secret_key" class="add_model add_generate_key" placeholder="secret_key" disabled="disabled">
+                                    <a class="tooltips" title="user secret key"><i class="icon-book"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first">create swift subuser ：</td>
+                                <td>
+                                    <input type="checkbox" id="add_create_swift_subuser" class="add_model" placeholder="create_swift_subuser">
+                                    <a class="tooltips" title="Generate a subuser to be used with Swift API."><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr class="isswiftsubuser">
+                                <td class="uds_first">subuser id ：</td>
+                                <td>
+                                    <input type="text" id="add_subuser" class="add_model add_create_swift_subuser" placeholder="subuser" disabled="disabled">
+                                    <a class="tooltips" title="subuser id"><i class="icon-book"></i></a>
+                                </td>
+                            </tr>
+                            <tr class="isswiftsubuser">
+                                <td class="uds_first">subuser permissions ：</td>
+                                <td>
+                                    <select id="add_subuser_access" class="add_model add_create_swift_subuser" disabled="disabled">
+                                        <option value="full">full</option>
+                                        <option value="read">read</option>
+                                        <option value="write">write</option>
+                                        <option value="readwrite">readwrite</option>
+                                    </select>
+                                    <a class="tooltips" title="set access permission for subuser"><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr class="isswiftsubuser">
+                                <td class="uds_first">generate swift key ：</td>
+                                <td>
+                                    <input type="checkbox" id="add_subuser_generate_key" class="add_model add_create_swift_subuser" checked="checked" placeholder="subuser_generate_key" disabled="disabled">
+                                    <a class="tooltips" title="Generate a new Swift key and add to the existing keyring."><i class="icon-book"> </i></a>
+                                </td>
+                            </tr>
+                            <tr class="isswiftsubuser isswiftkey">
+                                <td class="uds_first">swift key ：</td>
+                                <td>
+                                    <input type="text" id="add_subuser_secret_key" class="add_model add_subuser_generate_key" placeholder="subuser_secret_key" disabled="disabled">
+                                    <a class="tooltips" title="subuser swift key"><i class="icon-book"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="uds_first" colspan="2">
+                                    <button ng-click="addUserManage()" class="btn btn-success add_model_modify">Create</button>
+                                    <button class="btn btn-default add_model_reset">Reset</button>
+                                    <button onclick="showOperation('userDetail_add', 'hide')" class="btn btn-default">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content usermanage_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

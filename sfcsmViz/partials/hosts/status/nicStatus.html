@@ -1,0 +1,76 @@
+<h3>Nic status for {{nic._id}}</h3>
+<br />
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <td width="100px">Manufacturer：</td>
+        <td>{{nic.manufacturer}}</td>
+    </tr>
+    <tr>
+        <td>Product：</td>
+        <td>{{nic.product}}</td>
+    </tr>
+    <tr>
+        <td>MAC：</td>
+        <td>{{nic.HWaddr}}</td>
+    </tr>
+    <tr>
+        <td ng-if="nic.inet">Inet：</td>
+        <td ng-if="nic.inet">
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <td width="100px">Mask</td>
+                    <td>IP</td>
+                </tr>
+                <tr>
+                    <td>{{nic.inet.mask}}</td>
+                    <td>{{nic.inet.addr}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr ng-if="nic.stat">
+        <td>Status：</td>
+        <td>
+            <table class="table table-condensed table-nohead">
+                <tr>
+                    <td width="80px">RX</td>
+                    <td>
+                        <table class="table table-condensed table-nohead">
+                            <tr>
+                                <td width="90px" >bytes</td>
+                                <td width="90px">errors</td>
+                                <td width="90px">packets</td>
+                                <td width="90px">dropped</td>
+                            </tr>
+                            <tr style="border-top: 1px solid #dddddd">
+                                <td>{{nic.stat.rx.bytes|bytes}}</td>
+                                <td>{{nic.stat.rx.errors}}</td>
+                                <td>{{nic.stat.rx.packets}}</td>
+                                <td>{{nic.stat.rx.dropped}}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="80px">TX</td>
+                    <td>
+                        <table class="table table-condensed table-nohead">
+                            <tr>
+                                <td width="90px">bytes</td>
+                                <td width="90px">errors</td>
+                                <td width="90px">packets</td>
+                                <td width="90px">dropped</td>
+                            </tr>
+                            <tr>
+                                <td>{{nic.stat.tx.bytes|bytes}}</td>
+                                <td>{{nic.stat.tx.errors}}</td>
+                                <td>{{nic.stat.tx.packets}}</td>
+                                <td>{{nic.stat.tx.dropped}}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

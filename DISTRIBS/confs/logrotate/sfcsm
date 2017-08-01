@@ -1,0 +1,31 @@
+/var/log/sfcsm/cephprobe.log {
+    rotate 2
+    daily
+    size 10M
+    compress
+    missingok
+}
+
+/var/log/sfcsm/sysprobe.log {
+    rotate 2
+    daily
+    size 10M
+    compress
+    missingok
+}
+
+/var/log/sfcsm/webserver_error.log {
+    rotate 2
+    daily
+    size 10M
+    compress
+    missingok
+}
+
+/var/log/sfcsm/webserver_access.log {
+    rotate 2
+    daily
+    size 10M
+    compress
+    missingok
+}

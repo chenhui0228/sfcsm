@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>qualities</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.qualities_title{width:100%;margin:10px auto;}
+        .qualities_title{height:28px;overflow:hidden;}
+        .qualities_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .qualities_title ul li{width:40%;list-style:none;}
+        .qualities_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .qualities_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #qualitieslist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #qualitieslist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .qualities_again{margin-top:-10px;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .btn_close_style{opacity: 0.9;}
+        .placement_num_style{color:red;margin-top:-10px;width:200px;}
+        #myModal{width:625px;}
+    </style>
+    <script>
+        $(function(){
+            $(".isnum").keyup(function(){
+                var value=$(this).val();
+                $(this).val(value.replace(/\D|^0/g,''));
+            }).bind("paste",function(){
+                var value=$(this).val();
+                $(this).val(value.replace(/\D|^0/g,''));
+            }).css("ime-mode", "disabled");
+            $("input[name=pg_num]").blur(function(){
+                var value = $(this).val();
+                var isedit = $("input[name=isedit]").val();
+                if(isedit == 'true'){
+                    var oldPgNum = $("input[name=oldPg_Num]").val();
+                    if(parseInt(value) < parseInt(oldPgNum)) {
+                        alert('pg_num不能小于当前数值，请重新输入！');
+                        $(this).val(oldPgNum);
+                    }
+                    else
+                        $("input[name=pg_placement_num]").val(value);
+                }else
+                    $("input[name=pg_placement_num]").val(value);
+            });
+        });
+        function operation(obj){
+            $("input[name=type]").val(obj);
+            $("#qualities_detail_type").html(obj + ' <span class="caret"></span>');
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="qualities_title">
+    <ul>
+        <li>qualities</li>
+        <li><button type="button" class="btn btn-primary" data-ng-click="detailOperation('myModal')">创建</button></li>
+    </ul>
+</div>
+<table id="qualitieslist" border="1px">
+    <thead>
+    <tr>
+        <td>名称</td>
+        <td>状态</td>
+        <td>操作</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in QualitiesData">
+        <td>{{item.id}}</td>
+        <td>{{item.name}}</td>
+        <td>
+            <a href="javascript:void(0);" ng-click="detailOperation('myModal', item)" style="margin-right:15px;"><img src="../images/cluster/u345.png" title="编辑" height="20" width="20"/></a>
+            <a href="javascript:void(0);" ng-click="qualitiesDel(item.id)"><img src="../images/osd/u1153.png" title="删除" height="20" width="20"/></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="qualitiesDetail">
+                    <tr>
+                        <td>qualities_name</td>
+                        <td>
+                            <input type="text" name="qualities_name" placeholder="qualities_name" ng-model="qualitiesDetail.qualities_name">
+                            <input type="hidden" name="qualities" ng-value="qualitiesDetail.qualities">
+                            <input type="hidden" name="isedit" ng-value="qualitiesIsEdit">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>pg_num</td>
+                        <td>
+                            <input type="hidden" name="oldPg_Num" value="{{qualitiesOldPgNum}}">
+                            <input type="text" class="isnum" name="pg_num" placeholder="pg_num" ng-disabled="qualities_again_pg_num" ng-model="qualitiesDetail.pg_num">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>pg_placement_num</td>
+                        <td>
+                            <input type="text" class="isnum" name="pg_placement_num" placeholder="pg_placement_num" ng-model="qualitiesDetail.pg_placement_num">
+                            <button type="button" class="btn btn-primary qualities_again" ng-show="qualities_again_visible" data-ng-click="qualitiesEdit()">保存</button>
+                            <span class="placement_num_style">{{placement_num_tips}}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>
+                            <input type="hidden" name="type" ng-value="qualitiesDetail.type">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="qualities_detail_type">
+                                    {{qualitiesDetail.type == 1 ? 'replicated' : qualitiesDetail.type == 2 ? 'erasure' : qualitiesDetail.type}} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="javascript:void(0);" onclick="operation('replicated')">replicated</a></li>
+                                    <li><a href="javascript:void(0);" onclick="operation('erasure')">erasure</a></li>
+                                </ul>
+                            </div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>size</td>
+                        <td><input type="text" class="isnum" name="size" placeholder="size" ng-model="qualitiesDetail.size"> </td>
+                    </tr>
+                    <tr>
+                        <td>min_size</td>
+                        <td><input type="text" class="isnum" name="min_size" placeholder="min_size" ng-model="qualitiesDetail.min_size"> </td>
+                    </tr>
+                    <tr>
+                        <td>crush_ruleset</td>
+                        <td><input type="text" class="isnum" name="crush_ruleset" ng-disabled="qualitiesdisabled" placeholder="crush_ruleset" ng-model="qualitiesDetail.crush_ruleset"> </td>
+                    </tr>
+                    <tr>
+                        <td>crash_replay_interval</td>
+                        <td><input type="text" name="crash_replay_interval" ng-disabled="qualitiesdisabled" class="isnum" placeholder="crash_replay_interval" ng-model="qualitiesDetail.crash_replay_interval"> </td>
+                    </tr>
+                    <tr>
+                        <td>quota_max_objects</td>
+                        <td><input type="text" name="quota_max_objects" ng-disabled="qualitiesdisabled" class="isnum" placeholder="quota_max_objects" ng-model="qualitiesDetail.quota_max_objects"> </td>
+                    </tr>
+                    <tr>
+                        <td>quota_max_bytes</td>
+                        <td><input type="text" name="quota_max_bytes" ng-disabled="qualitiesdisabled" class="isnum" placeholder="quota_max_bytes" ng-model="qualitiesDetail.quota_max_bytes"> </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-ng-click="qualitiesEdit()">确定</button>
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content qualities_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

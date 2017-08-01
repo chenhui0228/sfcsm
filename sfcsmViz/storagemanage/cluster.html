@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>cluster</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.cluster_title{width:100%;margin:10px auto;}
+        .cluster_title{height:28px;overflow:hidden;}
+        .cluster_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .cluster_title ul li{width:40%;list-style:none;}
+        .cluster_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .cluster_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #clusterlist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #clusterlist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .checkdata {
+            position:absolute;
+            margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .btn_close_style{opacity: 0.9;}
+        #myModal{width:625px;}
+        .modal-body ul li{list-style:none;float:left;margin-left:5px;cursor:pointer;margin-top:15px;}
+        .clu_state{width:auto;}
+        .clu_state input,.clu_state span{float:left;}
+        .clu_state span{cursor:pointer;}
+    </style>
+    <script>
+        function operation(obj){
+            $("input[name=type]").val(obj);
+            $("#cluster_detail_type").html(obj + ' <span class="caret"></span>');
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="cluster_title">
+    <ul>
+        <li>cluster</li>
+        <li></li>
+    </ul>
+</div>
+<table id="clusterlist" border="1px">
+    <thead>
+    <tr>
+        <td>名称</td>
+        <td>状态</td>
+        <td>操作</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in ClusterData">
+        <td>{{item.name}}</td>
+        <td>{{item.health}}</td>
+        <td>
+            <a href="javascript:void(0);" ng-click="detailCluOperation('myModal', item)" style="margin-right:15px;"><img src="../images/cluster/u345.png" title="编辑" height="20" width="20"/></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li><label class="clu_state" for="cb_box_full"><input type="checkbox" id="cb_box_full" value="full"><span>full</span></label></li>
+                    <li><label class="clu_state" for="cb_box_pause"><input type="checkbox" id="cb_box_pause" value="pause"><span>pause</span></label></li>
+                    <li><label class="clu_state" for="cb_box_noup"><input type="checkbox" id="cb_box_noup" value="noup"><span>noup</span></label></li>
+                    <li><label class="clu_state" for="cb_box_nodown"><input type="checkbox" id="cb_box_nodown" value="nodown"><span>nodown</span></label></li>
+                    <li><label class="clu_state" for="cb_box_noout"><input type="checkbox" id="cb_box_noout" value="noout"><span>noout</span></label></li>
+                    <li><label class="clu_state" for="cb_box_noin"><input type="checkbox" id="cb_box_noin" value="noin"><span>noin</span></label></li>
+                    <li><label class="clu_state" for="cb_box_nobackfill"><input type="checkbox" id="cb_box_nobackfill" value="nobackfill"><span>nobackfill</span></label></li>
+                    <li><label class="clu_state" for="cb_box_norebalance"><input type="checkbox" id="cb_box_norebalance" value="norebalance"><span>norebalance</span></label></li>
+                    <li><label class="clu_state" for="cb_box_norecover"><input type="checkbox" id="cb_box_norecover" value="norecover"><span>norecover</span></label></li>
+                    <li><label class="clu_state" for="cb_box_noscrub"><input type="checkbox" id="cb_box_noscrub" value="noscrub"><span>noscrub</span></label></li>
+                    <li><label class="clu_state" for="cb_box_nodeep-scrub"><input type="checkbox" id="cb_box_nodeep-scrub" value="nodeep-scrub"><span>nodeep-scrub</span></label></li>
+                    <li><label class="clu_state" for="cb_box_notieragent"><input type="checkbox" id="cb_box_notieragent" value="notieragent"><span>notieragent</span></label></li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content cluster_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

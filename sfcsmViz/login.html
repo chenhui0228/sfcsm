@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=UTF-8/>
+    <title>Sfcsm sign in</title>
+
+    <link rel="stylesheet" type="text/css" media="screen" href="css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/tooltip.css"/>
+    <link rel="stylesheet" href="css/animation.css">
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+</head>
+
+<body>
+<div id="page_header" style="margin-top: 80px;text-align: center">
+    <div id="page_logo" style="text-align: center"><img src="/sfcsmViz/img/sfcsm_logo.png" border="0"></div>
+    <!--<div id="page_title">Sfcsm sign in</div>-->
+</div>
+<div class="container" style="text-align: center">
+  <div class="row" style="margin-left: 0px">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-6" style="text-align: center">
+      <div id="error_message" class="alert alert-danger" role="alert" style="visibility: hidden;">Invalid user name or password.</div>
+      <form class="form" name="form" method="post" action="../sfcsmCtrl/login/" novalidate>
+        <div class="form-group" style="margin-bottom: 15px">
+          <!--<strong>User</strong><br>-->
+          <input type="text" name="name" class="form-control" placeholder="username" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px">
+          <!--<strong>Password</strong><br>-->
+          <input type="password" name="password" class="form-control" placeholder="password" required>
+        </div>
+        <div>
+          <button class="btn btn-success" type="submit" style="width: 220px">
+            Login
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    if (window.location.search.indexOf('failed') > -1) {
+        $("#error_message").css( "visibility", "visible" );
+    }
+</script>
+</body>

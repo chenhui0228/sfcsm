@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>system log</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.cluster_title{width:100%;margin:10px auto;}
+        .cluster_title{height:28px;overflow:hidden;}
+        .cluster_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .cluster_title ul li{width:40%;list-style:none;}
+        .cluster_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .cluster_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #clusterlist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #clusterlist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .checkdata {
+            position:absolute;
+            margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .btn_close_style{opacity: 0.9;}
+        #myModal{width:625px;}
+        .modal-body ul li{list-style:none;float:left;margin-left:5px;cursor:pointer;margin-top:15px;}
+        .clu_state input,.clu_state span{float:left;}
+        .clu_state span{cursor:pointer;}
+    </style>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="cluster_title">
+    <ul>
+        <li>system log</li>
+        <li></li>
+    </ul>
+</div>
+<table id="clusterlist" border="1px">
+    <thead>
+    <tr>
+        <td>handle_status</td>
+        <td>first_occurs_time</td>
+        <td>log_level</td>
+        <td>description</td>
+        <td>occurs_time</td>
+        <td>handler</td>
+        <td>handle_time</td>
+        <td>operation</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in SyslogData">
+        <td>{{item.handle_status}}</td>
+        <td>{{item.first_occurs_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td>{{item.log_level}}</td>
+        <td>{{item.description}}</td>
+        <td>{{item.occurs_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td>{{item.handler}}</td>
+        <td>{{item.handle_time}}</td>
+        <td><a href="javascript:void(0);" ng-click="detailSysOperation('myModal', item)" style="margin-right:15px;">Show Detail</a></td>
+    </tr>
+    </tbody>
+</table>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 关闭按钮 -->
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea style="width:98%;min-height:200px;">
+                    {{SystemLogInfo}}
+                </textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default close btn_close_style" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content cluster_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

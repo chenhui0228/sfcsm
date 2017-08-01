@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>bucketmanage</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.bucketmanage_title{width:100%;margin:10px auto;}
+        .bucketmanage_title{height:28px;overflow:hidden;}
+        .bucketmanage_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .bucketmanage_title ul li{width:40%;list-style:none;}
+        .bucketmanage_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .bucketmanage_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #usermanagelist tr td{border:1px solid #eee;font-size:15px;padding:20px;text-align:center;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .userlist{width:100%;height:auto;overflow:hidden;}
+        .userlist ul{float:left;margin-left:0px;margin-right:0px;overflow:hidden;}
+        .userlist ul li{list-style:none;padding:4px;}
+        .userlist .user_name{width:15%;}
+        .userlist .bucket_detail{width:50%;}
+        .userlist .bucketDetail_Operation{width:34%;}
+        .userlist .user_name li{border:1px solid #eee;border-bottom:none;padding:10px;text-align:center;cursor:pointer;}
+        .userlist .user_name li:last-child{border-bottom:1px solid #eee;}
+        .userlist .user_name li:hover{background-color:rgba(236 ,198, 198, 0.32);}
+        .userlist .bucket_detail table tr td{padding:4px;border:1px solid #eee;}
+        .bck{background-color:rgba(236 ,198, 198, 0.32);}
+        .uds_first{text-align:right;}
+        .uds_first label{margin-right:4px;float:right;}
+        .udo{display:none;}
+        .udc_table{border:0;}
+        .udc_table tr{border-bottom:1px solid #eee;}
+        .udc_table tr:last-child{border-bottom:0px;}
+        .udc_table tr td{padding:5px;}
+        .ud_detail_table table{width:100%;}
+        .click_style_1{background-color: rgba(236 ,198, 198, 0.32);}
+        .bucketDetail_add table tr td{padding:8px;}
+        .sud_model{float:left;}
+        .bucket_detail tr:hover{background-color:#f5f5f5;}
+    </style>
+    <script>
+        $(function(){
+            $(".bucket_reset").click(function(){
+                $("#bucket_name,#bucket_owner").val('');
+            });
+        });
+        function showOperation(obj, type){
+            $(".udo,.bucket_detail").hide();
+            if(isNullOrEmpty(type))
+                $("." + obj).show();
+            else $("." + obj).hide();
+        }
+    </script>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="bucketmanage_title">
+    <ul>
+        <li>bucketmanage</li>
+        <li></li>
+    </ul>
+</div>
+<div style="padding:0 0 5px 15px;">
+    new bucket
+    <a href="javascript:void(0);" onclick="showOperation('bucketDetail_add')">
+        <i class="icon-plus-sign" alt="add a new bucket" title="add a new bucket"></i>
+    </a>
+</div>
+<div class="userlist">
+    <ul class="user_name">
+        <li class="users" ng-repeat="item in BucketmanageData" ng-click="showbucketDetail(item)">{{item}}</li>
+    </ul>
+    <ul class="bucket_detail hide">
+        <table class="table-condensed table-nohead" style="margin-left:5px;">
+            <tbody>
+            <tr><td width="100px">Name</td> <td> {{ detailedBucket.bucket }} </td></tr>
+            <tr><td>Id</td> <td> {{ detailedBucket.id }} </td></tr>
+            <tr><td>Owner</td> <td> {{ detailedBucket.owner }} </td></tr>
+            <tr><td>Pool</td> <td> {{ detailedBucket.pool }} </td></tr>
+            <tr><td>Version</td> <td> {{ detailedBucket.ver }} </td></tr>
+            <tr><td>Master version</td> <td> {{ detailedBucket.master_ver }} </td></tr>
+            <tr><td>Marker</td> <td> {{ detailedBucket.marker }} </td></tr>
+            <tr><td>Max marker</td> <td> {{ detailedBucket.max_marker }} </td></tr>
+            <tr><td>Modification time</td> <td> {{ detailedBucket.mtime *1000 | date:'medium' }} </td></tr>
+            <tr><td>Index pool</td> <td> {{ detailedBucket.index_pool }} </td></tr>
+            <tr>
+                <td>Bucket quota</td>
+                <td ng-show="detailedUser.bucket_quota.enabled">
+                    <div ng-show="detailedUser.bucket_quota.max_objects>-1">
+                        max objects :{{detailedUser.bucket_quota.max_objects}}
+                    </div>
+                    <div ng-show="detailedUser.bucket_quota.max_size_kb >-1">
+                        max size: {{detailedUser.bucket_quota.max_size_kb*1024|bytes}}
+                    </div>
+                </td>
+                <td ng-hide="detailedUser.bucket_quota.enabled">
+                    disabled
+                </td>
+            </tr>
+            <tr><td>Usage</td>
+                <td>
+                    <table  class="table table-condensed table-nohead">
+                        <tr ng-repeat="(key, value) in detailedBucket.usage">
+                            <td width="150px"> {{key.replace('_',' ', 'gi')}} </td>
+                            <td> <table  class="table table-condensed table-nohead">
+                                <tr ng-repeat="(key, value) in value">
+                                    <td width="150px"> {{key.replace('_',' ', 'gi')}} </td>
+                                    <td> {{ value }} </td>
+                                </tr>
+                            </table> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="uds_first">
+                    <button ng-click="deleteBucket(detailedBucket.bucket)" class="btn btn-danger">Delete</button>
+                    <button class="btn btn-default" onclick="showOperation('bucket_detail', 'hide');">Cancel</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </ul>
+    <ul class="bucketDetail_Operation">
+        <li class="udo bucketDetail_add">
+            <table>
+                <tr>
+                    <td class="uds_first">Bucket name ：</td>
+                    <td><input type="text" id="bucket_name" placeholder="bucket_name"></td>
+                </tr>
+                <tr>
+                    <td class="uds_first">Owner ：</td>
+                    <td>
+                        <select id="bucket_owner">
+                            <option value=""></option>
+                            <option ng-repeat="item in UsermanageData" value="{{item.display_name}}">{{item.display_name}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="uds_first">
+                        <button ng-click="createBucket()" class="btn btn-success">Create</button>
+                        <button class="btn btn-danger bucket_reset">Reset</button>
+                        <button class="btn btn-default" onclick="showOperation('bucketDetail_add', 'hide');">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    </ul>
+</div>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content usermanage_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

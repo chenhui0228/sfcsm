@@ -1,0 +1,46 @@
+<!doctype html>
+<html ng-app="FlagsApp">
+<head>
+    <meta charset=utf-8 />
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-route.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/flagsApp.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/testAdmin.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Cluster general flags</title>
+</head>
+<body ng-controller="flagsCtrl" onresize="resizeBlocks(['#list','#control'])">
+
+
+<header id="header" ng-include src="'partials/header.html'" ng-init="pageTitle='Cluster general flags'"></header>
+
+<div id="datePanel"><br>Date : {{date | date:'HH:mm:ss'}}</div>
+
+<div id="list" style="margin: 2em 150px; width:150px">
+    <div ng-repeat="flag in flagList" ng-show="isAvailable(flag)">
+        <a ng-show="isSet(flag)" class="btn btn-warning"  style="width:100px" ng-click="unsetFlag(flag)" >{{ flag.name }} <i class="icon-white icon-remove"></i></a>
+        <a ng-show="!isSet(flag)" class="btn btn-default"  style="width:100px" ng-click="setFlag(flag)" >{{ flag.name }} <i class="icon-check"></i></a>
+        <br><br>
+    </div>
+</div>
+
+<div id="control" style="float:left" >
+    <h3>About flags</h3>
+    <div ng-repeat="flag in flagList">
+        <span ng-show="isAvailable(flag)">
+            <strong>{{flag.name}}</strong>: <span ng-bind-html=" flag.description"></span><br>
+        </span>
+    </div>
+</div>
+
+<script>resizeBlocks(['#list','#control']);</script>
+
+</body>
+</html>

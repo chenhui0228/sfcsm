@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="StatusApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css"/>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/angular/angular.min.js"></script>
+    <script src="../scripts/angular/angular-cookies.min.js"></script>
+    <script src="../scripts/angular/angular-animate.min.js"></script>
+    <script src="../scripts/angular/angular-sanitize.min.js"></script>
+    <script src="../scripts/angular-misc/ng-table.min.js"></script>
+    <script src="../scripts/angular-misc/angular-commons.js"></script>
+    <script src="../scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="../scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="../scripts/angular-misc/D3Directives.js"></script>
+    <script src="../scripts/bootstrap.js"></script>
+    <script src="../scripts/bootstrap.min.js"></script>
+    <script src="../scripts/statusApp.js"></script>
+    <style>
+        body{width:98%;margin:0 auto;border:1px solid #797979;}
+        #header,.monitor_title{width:100%;margin:10px auto;}
+        .monitor_title{height:28px;overflow:hidden;}
+        .monitor_title ul{height:28px;margin-left:0px;overflow:hidden;}
+        .monitor_title ul li{width:40%;list-style:none;}
+        .monitor_title ul li:first-child{float:left;line-height:28px;margin-left:15px;font-weight:bold;}
+        .monitor_title ul li:last-child{float:right;text-align:right;margin-right:15px;}
+        #monitorlist{width:98%;margin:10px auto;margin-bottom:40px;}
+        #monitorlist tr td{border:1px solid #eee;font-size:15px;padding:12px;text-align:center;}
+        .checkdata {
+            position:fixed;margin:auto;left:0; right:0; top:0; bottom:0;width:480px; height:50px;z-index:9999;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            text-align: center;
+            line-height: 50px;
+            font-size:32px;
+            font-weight:bold;
+            color:green;
+        }
+        .monitor_oper a{width:16%;float:left;text-align:center;padding:5px;}
+        .monitor_oper a{text-decoration:none;}
+        .monitor_oper a div{background-color:#169BD5;border-radius:3px;height:23px;width:45px;line-height:23px;color:white;margin:0 auto;}
+    </style>
+</head>
+<body ng-controller="statusCtrl">
+<header id="header" ng-include src="'../partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="monitor_title">
+    <ul>
+        <li>Monitor</li>
+        <li></li>
+    </ul>
+</div>
+<table id="monitorlist" border="1px">
+    <thead>
+    <tr>
+        <td>health</td>
+        <td>name</td>
+        <td>rank</td>
+        <td>addr</td>
+        <td>Operation</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in MonitorData">
+        <td>{{item.health}}</td>
+        <td>{{item.name}}</td>
+        <td>{{item.rank}}</td>
+        <td>{{item.addr}}</td>
+        <td class="monitor_oper">
+            <a href="javscript:void(0);"></a>
+            <a href="javascript:void(0);"><img src="../images/cluster/u345.png" title="编辑" height="20" width="20"/></a>
+            <a href="javascript:void(0);" ng-click="monitorEnable(item, 'OP004')"><div class="monitor_oper">启动</div></a>
+            <a href="javascript:void(0);" ng-click="monitorEnable(item, 'OP003')"><div class="monitor_oper">停止</div></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="checkData" style="display:none;">
+    <div class="loading-shade"></div>
+    <div class="loading-content data-content monitor_tips" onclick="$.loading(false)">数据处理中，请稍后…</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+#!/usr/bin/python
+#@author eric Mourgaya
+# check  ceph health
+# import  the libmonjuice  from /opt/sfcsm/lib
+import os
+import sys
+LIBREP="/opt/sfcsm/lib/"
+LIBPATH=os.path.dirname(LIBREP)
+if LIBPATH not in sys.path:
+    sys.path.append(LIBPATH)
+from libmongojuice import *
+import sys
+
+res,msg=cephprobeis_uptodate(600000)
+if  res == 0:
+    print "process cephprobe is up to date ok on ",msg
+elif res == 1:
+    print "warning ceph probe "+ "check it on "+ msg
+else:
+    print "warning ceph probe "+ "check it on "+ msg
+
+sys.exit(res)
+

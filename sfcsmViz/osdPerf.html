@@ -1,0 +1,97 @@
+<!doctype html>
+<html ng-app="OsdPerf">
+<head>
+    <meta charset=utf-8 />
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-route.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/osdPerfApp.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/d3/d3.v3.min.js"></script>
+    <script src="scripts/d3/nv.d3.min.js" charset="utf-8"></script>
+    <script src="scripts/d3/common.js"></script>
+    <script src="scripts/d3/colorbrewer.js"></script>
+    <link rel="stylesheet" href="css/testAdmin.css" />
+    <link rel="stylesheet" href="css/tooltip.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="scripts/angular-misc/ng-table.min.css">
+    <link rel="stylesheet" href="css/nv.d3.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <title>Osd perf</title>
+</head>
+
+<body ng-controller="OsdPerfCtrl" onresize="resizeBlocks(['#list','#control'])">
+
+
+<header id="header" ng-include src="'partials/header.html'" ng-init="pageTitle='OSDs performance'"></header>
+
+<div>
+    <!--div id="status"  >{{status}}</div-->
+    <div id="datePanel"><br>Date : {{date | date:'HH:mm:ss'}}</div>
+
+    <div id="list">
+        <table>
+            <tr>
+                <th><input type="text" ng-model="search.id" class="search-query" placeholder="Search osd name"></th>
+                <th>&nbsp; &nbsp; </th>
+                <th></th>
+            </tr>
+        </table>
+        <br>
+        <table ng-table="tableParams" class="table table-condensed clickable">
+            <tr ng-repeat="osd in orderedData | filter:search:strict" ng-click="showOsd(osd.id)">
+                <td data-title="'Id'" sortable="'id'">osd.{{osd.id}}</td>
+                <td data-title="'Apply latency'" sortable="'perf_stats.apply_latency_ms'" style="text-align: right">{{ osd.perf_stats.apply_latency_ms }}</td>
+                <td data-title="'Commit latency'" sortable="'perf_stats.commit_latency_ms'" style="text-align: right">{{ osd.perf_stats.commit_latency_ms }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="control" ng-show="osd" style="float:right;width:250px">
+    <div class="osd  {{osdClass(osd)}}" style="float:right">
+            {{osd.node._id}}
+    </div>
+    <h3>{{osd.node.name}}</h3>
+    <br>
+
+    <strong>{{osdState(osd)}}</strong>
+    <br><br>
+
+    <div id="osdStatGraph"><svg style="height:180px;width:100%"></svg></div>
+    <div>
+    last control : {{osd.lastControl|duration}}<br>
+    reweight : {{osd.reweight }}<br>
+    {{osd.partition._id}}<br>
+    {{osd.public_addr}}<br>
+        </div>
+    <ad-gauge value="osd.partition.stat.used/osd.partition.stat.total" colormode="desc" width="241" style="margin:5px auto;width:241px"></ad-gauge>
+    <div class="gaugeLegend">
+        {{osd.partition.stat.used| bytes}} used <br>on {{osd.partition.stat.total| bytes}}
+    </div>
+
+    <div ng-show="hasRole('admin')">
+        <hr>
+        <div align="center">
+            <a class="btn btn-success" ng-hide="osd.stat.in == true" ng-click="osdIn(osd.id)" ><i class="icon-white icon-plus"></i> get in</a>
+            <a class="btn btn-danger" ng-hide="osd.stat.in != true" ng-click="osdOut(osd.id)"><i class="icon-white icon-minus"></i> get out</a>
+            <a class="btn btn-warning" ng-hide="osd.stat.up == false" ng-click="osdDown(osd.id)"><i class="icon-white icon-arrow-down"></i> down</a>
+            <a href="monitorOSD.html#/osd/osd-{{osd.node._id}}" class="btn btn-info" ng-show="useInfluxDB"><i class="fa fa-line-chart"></i> Monitor</a>
+        </div>
+        <div>
+            <hr>
+            <input ng-model="reweight" id="reweight" type="text" style="width:150px;vertical-align: top">
+            <a class="btn btn-warning btn-small" ng-click="osdReweight(osd.id)"><i class="fa fa-balance-scale"></i> Reweight</a>
+        </div>
+    </div>
+</div>
+
+<script>resizeBlocks(['#list','#control']);</script>
+</body>
+</body>
+</html>

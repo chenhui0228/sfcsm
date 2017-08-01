@@ -1,0 +1,19 @@
+<h3>Memory status for {{hostId}}</h3>
+<br />
+<!--<div cpu-dashboard style="width: 100%;height: 100%"></div>-->
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <th style="text-align: center">total</th>
+        <th style="text-align: center">used</th>
+        <th style="text-align: center">cached</th>
+        <th style="text-align: center">free</th>
+        <th style="text-align: center">buffers</th>
+    </tr>
+    <tr>
+        <td style="text-align: center">{{memStatusDetail.total|bytes}}</td>
+        <td style="text-align: center">{{memStatusDetail.used|bytes}}</td>
+        <td style="text-align: center">{{memStatusDetail.cached|bytes}}</td>
+        <td style="text-align: center">{{memStatusDetail.free|bytes}}</td>
+        <td style="text-align: center">{{memStatusDetail.buffers|bytes}}</td>
+    </tr>
+</table>

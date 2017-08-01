@@ -1,0 +1,26 @@
+<h3>Cpu status for {{hostId}}</h3>
+<br />
+<table  class="table table-condensed table-nohead" style="width: 100%">
+    <tr>
+        <th style="text-align: center">system</th>
+        <th style="text-align: center">user</th>
+        <th style="text-align: center">idle</th>
+        <th style="text-align: center">guest_nice</th>
+        <th style="text-align: center">iowait</th>
+        <th style="text-align: center">softirq</th>
+        <th style="text-align: center">irq</th>
+        <th style="text-align: center">steal</th>
+        <th style="text-align: center">guest</th>
+    </tr>
+    <tr>
+        <td style="text-align: center">{{cpuStatusDetail.system}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.user}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.idle}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.guest_nice}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.iowait}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.softirq}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.irq}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.steal}} %</td>
+        <td style="text-align: center">{{cpuStatusDetail.guest}} %</td>
+    </tr>
+</table>

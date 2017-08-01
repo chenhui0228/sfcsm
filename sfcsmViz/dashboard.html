@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html ng-app="StatusApp">
+<head>
+    <meta charset=utf-8/>
+    <title>SFCSM</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/testAdmin.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/nv.d3.min.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/rickshaw.min.css"/>
+    <link rel="stylesheet" href="css/tooltip.css"/>
+    <link rel="stylesheet" href="css/animation.css">
+    <link rel="stylesheet" href="css/myapp.css">
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-cookies.min.js"></script>
+    <script src="scripts/angular/angular-animate.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/d3/d3.v3.min.js" charset="utf-8"></script>
+    <script src="scripts/d3/common.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/d3/colorbrewer.js"></script>
+    <script src="scripts/d3/rickshaw.min.js"></script>
+    <script src="scripts/d3/nv.d3.min.js" charset="utf-8"></script>
+    <script src="scripts/statusApp.js"></script>
+    <script src="scripts/echarts.min.js"></script>
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <style>
+        .button, .closeButton {
+            float: right;
+            cursor: pointer;
+        }
+        .closeButton {
+            opacity: 0.3;
+        }
+        #controlPanel {
+            border: black solid 1px;
+            background-color: white;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            margin: 10px;
+            border-radius: 5px;
+            vertical-align: middle;
+            padding:5px;
+            z-index: 10;
+
+        }
+
+        #controlPanelOpen {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            margin: 10px;
+            z-index: 0;
+        }
+        #chart_container {
+            position: relative;
+            width: 350px;
+            height: 50px;
+            font-family: Arial, Helvetica, sans-serif;
+            float:right;
+            text-align: right;
+            font-size: .85em;
+        }
+        #iopschart {
+            position: relative;
+            left: 40px;
+        }
+        #y_axis {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+        }
+        #menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        #menu li {
+            display:inline;
+        }
+        #menu li a {
+            padding:10px ;
+            text-align: center ;
+            text-decoration: none ;
+        }
+        #menu li a:hover, #menu li a:focus, #menu li a:active {
+            text-decoration: underline ;
+        }
+
+
+        #controlmenu {
+            border: black solid 1px;
+            position: absolute;
+            top: 0px;
+            right: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            vertical-align: middle;
+            line-height: 40px;
+            padding:5px;
+        }
+        .sfhide{display:none;}
+        body{width:100%;margin:0 auto;}
+        #sfcsm_index{
+            width:100%;
+            height:auto;overflow:hidden;
+            border-radius: 4px;
+            padding-top:5px;
+            padding-left:5px;
+            padding-bottom:5px;
+            margin-left:15px;
+            margin:0 auto;
+        }
+        #sfcsm_index .sfchart{
+            width:32.5%;height:220px;float:left;border:1px solid #eee;margin:3px;
+            border-radius:4px;overflow:hidden;
+            background-color:#FFFFFF;
+        }
+
+        .storageinfo_right{margin-top:40px;}
+        .storageinfo_right ul,.poolinfo_right ul{margin:0px 0px 25px 10px;}
+        .storageinfo_right ul li:first-child,.healthinfo_right ul li:first-child,.monitorinfo_right ul li:first-child{width:40%;}
+        .storageinfo_right ul li:last-child,.healthinfo_right ul li:last-child,.monitorinfo_right ul li:last-child{width:59.5%;}
+        .healthinfo_right,.cluhinfo_right{margin-top:25px;height:130px;}
+        .healthinfo_right ul,.cluhinfo_right ul{margin:0px 0px 15px 10px;}
+        .monitorinfo_right{margin-top:40px;}
+        .monitorinfo_right ul{margin-bottom:25px;}
+        .osdinfo_left table{margin:16px auto;}
+        .osdinfo_left tr{margin:10px;}
+        .osdinfo_left tr td{height:60px;width:60px;text-align:center;}
+        .osdinfo_left tr td div{height:50px;line-height:50px;width:50px;border-radius:11px;background-color:#eee;margin:5px;}
+        .osdinfo_right,.poolinfo_right{margin-top:30px;}
+        .osdinfo_right ul li:first-child{width:35.5%;padding-top:4px;}
+        .pginfo_right{margin-top:70px;}
+        .pginfo_right ul li:first-child{padding-top:4px;width:30.5%;}
+        .pginfo_right ul li div{width:35px;height:10px;border-radius:3px;}
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            var indexData = IndexData();
+            //sfcsm_index样式
+            //$("#sfcsm_index").css('width', $("#container").width() + 'px');
+            //osd样式设置
+            $.each($(".osdinfo_left tr td"), function(){
+                var className = $(this).attr('class');
+                $(this).children().css('background-color', '#' + className.replace('sf_osd_', ''));
+            });
+            $.each($(".osdinfo_right ul"), function(){
+                var li = $(this).children().first();
+                var className = li.attr('class');
+                li.children().css({'background-color':'#' + className.replace('sf_osd_', '')
+                    ,'width':'35px','height':'10px','border-radius':'3px'});
+                $(this).children().last().css('color', '#' + className.replace('sf_osd_', ''));
+            });
+            //pg样式设置
+            {
+                var res = indexData.output.pgmap;
+                var _pgHtml = '';
+                var _otherCount = 0;
+                var _pgUlNum = 0;
+                for (var i = 0; i < res.pgs_by_state.length; i++) {
+                    if (i < 5) {
+                        _pgUlNum++;
+                        var color = defaultColors[i];
+                        _pgHtml += '<ul title="' + res.pgs_by_state[i]['count'] + '"><li><div style="background-color:' + color + '"></div></li><li style="color:' + color + '">' + res.pgs_by_state[i]['state_name'] + '</li></ul>';
+                    } else if (i >= 5) {
+                        _pgUlNum++;
+                        _otherCount = _otherCount + res.pgs_by_state[i]['count'];
+                    }
+                }
+                if (_otherCount > 0)
+                    _pgHtml += '<ul title="' + _otherCount + '"><li><div style="background-color:' + defaultColors[5] + '"></div></li><li style="color:' + defaultColors[5] + '">其它</li></ul>';
+                var _pgMarginBottom = '-2px';
+                if (_pgUlNum == 6)
+                    _pgMarginBottom = '-2px';
+                else if (_pgUlNum == 5) _pgMarginBottom = '2px';
+                else if (_pgUlNum == 4) _pgMarginBottom = '9px';
+                else if (_pgUlNum == 3) _pgMarginBottom = '22px';
+                else if (_pgUlNum == 2) _pgMarginBottom = '60px';
+                else if (_pgUlNum == 1) _pgMarginBottom = '0px';
+                $(".pginfo_right").html(_pgHtml);
+                $(".pginfo_right ul").css('margin-bottom', _pgMarginBottom);
+            }
+            //monitor（集群）模块
+            var healthState = $("#cluster_health_overall").html();
+            if(!isNullOrEmpty(healthState)){
+                healthState = healthState.replace('HEALTH_', '');
+                var color = 'green';
+                if(healthState == 'OK') {
+                    color = 'green';
+                }else if(healthState == 'WARN') {
+                    color = '#E48F0F';
+                }else if(healthState == 'ERR') {
+                    color = '#F00';
+                }
+                $("#cluster_health_overall").html('<span>' + healthState + '</span>').css('color', color);
+            }
+            $.each($(".monitorinfo_right ul"), function(){
+                var health = $(this).attr('health');
+                var healthColor = 'green';
+                if(health == 'OK') {
+                    healthColor = 'green';
+                }else if(health == 'WARN') {
+                    healthColor = '#E48F0F';
+                }else if(health == 'ERR') {
+                    healthColor = '#F00';
+                }
+                $(this).children().css('color', healthColor);
+            });
+            //osd模块计算
+            {
+                //   in/up = min(in, up)
+                //   in/down = in - in/up
+                //   out/up = up - in/up
+                //   out/down = out - out/up
+                var osdIn = $("#osd_table").attr('osdIn');
+                var osdUp = $("#osd_table").attr('osdUp');
+                var osd = $("#osd_table").attr('osd');
+                var out = osd - osdIn;
+                var in_up = 0;
+                if (osdIn > osdUp)
+                    in_up = osdUp;
+                else
+                    in_up = osdIn;
+                var out_up = osdUp - in_up;
+                $("#in_up").html(in_up);
+                $("#in_down").html(osdIn - in_up);
+                $("#out_up").html(osdUp - in_up);
+                $("#out_down").html(out - out_up);
+            }
+        });
+    </script>
+</head>
+<body  ng-controller="statusCtrl">
+<header id="header" ng-include src="'partials/header.html'" ng-init="pageTitle='Ceph status'"></header>
+<div class="mainDiv">
+    <i id="controlPanelOpen" class="icon-eye-close button sfhide" title="show/hide modules" alt="show/view modules" ng-click="viewControlPanel=true"></i>
+    <div id="controlPanel" ng-show="viewControlPanel" class="animate-show">
+        <i class="icon-remove closeButton" ng-click="viewControlPanel=false" style="float:right"></i>
+        Display module: <br>
+        <input type="checkbox" ng-model="viewMonitorModule" ng-change="showModule('viewMonitorModule',viewMonitorModule)"> Monitors<br>
+        <input type="checkbox" ng-model="viewPgStatusModule" ng-change="showModule('viewPgStatusModule',viewPgStatusModule)"> PG status<br>
+        <input type="checkbox" ng-model="viewCapacityModule" ng-change="showModule('viewCapacityModule',viewCapacityModule)"> Capacity<br>
+        <input type="checkbox" ng-model="viewOsdModule" ng-change="showModule('viewOsdModule',viewOsdModule)"> OSDs<br>
+        <input type="checkbox" ng-model="viewPoolModule" ng-change="showModule('viewPoolModule',viewPoolModule)"> Pools<br>
+        <input type="checkbox" ng-model="viewMdsModule" ng-change="showModule('viewMdsModule',viewMdsModule)"> MDSs
+    </div>
+
+    <div id="container" class="mycharts">
+        <div id="sfcsm_index">
+            <div class="sfchart">
+                <div class="mycharts_title">数据</div>
+                <div class="mycharts_pic">
+                    <div id="ClusterDataStatus" ng-if="!CAbnormal_objects" ata-ng-show="show" bar-charts data-source='itemData' class="mycharts_pie"></div>
+                    <div id="ClusterDataStatusRecovery" ng-if="CAbnormal_objects" ata-ng-show="show" bar-charts data-source='itemData' class="mycharts_pie"></div>
+                </div>
+                <div class="mycharts_description cluhinfo_right">
+                    <ul>
+                        <li>总数据</li>
+                        <li>{{CByte_used}}</li>
+                    </ul>
+                    <ul>
+                        <li>待恢复(Objects)</li>
+                        <li ng-if="CAbnormal_objects != 0">{{CAbnormal_objects}}</li>
+                        <li ng-if="CAbnormal_objects == 0">-</li>
+                    </ul>
+                    <ul>
+                        <li>恢复速率(I/O)</li>
+                        <li ng-if="CRecovering_bytes_per_sec">{{CRecovering_bytes_per_sec}} bytes/s</li>
+                        <li ng-if="!CRecovering_bytes_per_sec">-</li>
+                    </ul>
+                    <ul>
+                        <li>恢复速率(Objects)</li>
+                        <li ng-if="CRecovering_objects_per_sec">{{CRecovering_objects_per_sec}} objects/s</li>
+                        <li ng-if="!CRecovering_objects_per_sec">-</li>
+                    </ul>
+                    <ul>
+                        <li>剩余恢复时间</li>
+                        <li ng-if="CRecoverying_tm">{{CRecoverying_tm}} s</li>
+                        <li ng-if="!CRecoverying_tm">-</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sfchart">
+                <div class="mycharts_title">集群</div>
+                <div class="mycharts_pic">
+                    <div class="cluster_health_overall" ng-if="HealthStatus == 'HEALTH_WARN'" style="color: #f89406">WARN</div>
+                    <div class="cluster_health_overall" ng-if="HealthStatus == 'HEALTH_OK'" style="color: #00AA00">OK</div>
+                    <div class="cluster_health_overall" ng-if="HealthStatus == 'HEALTH_ERR'" style="color: #FF0000">ERR</div>
+                </div>
+                <div class="mycharts_description monitorinfo_right" ng-repeat="map in HealthMonmap">
+                    <ul title="{{map.health_detail}}" health="{{map.health}}">
+                        <li>{{map.name}}</li>
+                        <li>{{map.addr.substring(0, map.addr.indexOf(':'))}}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sfchart">
+                <div class="mycharts_title">OSD</div>
+                <div class="mycharts_pic osdinfo_left">
+                    <table id="osd_table" osdIn="{{itemData.osdmap.osdmap.num_in_osds}}" osdUp="{{itemData.osdmap.osdmap.num_up_osds}}" osd="{{itemData.osdmap.osdmap.num_osds}}">
+                        <tr>
+                            <td class="sf_osd_0F6"><div id="in_up">10</div></td>
+                            <td class="sf_osd_FFBBBB"><div id="in_down">0</div></td>
+                        </tr>
+                        <tr>
+                            <td class="sf_osd_95D1E5"><div id="out_up">10</div></td>
+                            <td class="sf_osd_F00"><div id="out_down">0</div></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="mycharts_description osdinfo_right">
+                    <ul>
+                        <li class="sf_osd_0F6" ><div></div></li>
+                        <li>in/up</li>
+                    </ul>
+                    <ul>
+                        <li class="sf_osd_FFBBBB"><div></div></li>
+                        <li>in/down</li>
+                    </ul>
+                    <ul>
+                        <li class="sf_osd_95D1E5"><div></div></li>
+                        <li>out/up</li>
+                    </ul>
+                    <ul>
+                        <li class="sf_osd_F00"><div></div></li>
+                        <li>out/down</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sfchart">
+                <div class="mycharts_title">容量</div>
+                <div class="mycharts_pic">
+                    <div id="StorageInfo1" ata-ng-show="show" bar-charts data-source='itemData' style="width:200px;height:200px;"></div>
+                </div>
+                <div class="mycharts_description storageinfo_right">
+                    <ul>
+                        <li>已使用</li>
+                        <li>{{PGbtyesUsed}}</li>
+                    </ul>
+                    <ul>
+                        <li>未用</li>
+                        <li>{{PGbtyesAvail}}</li>
+                    </ul>
+                    <ul>
+                        <li>总空间</li>
+                        <li>{{PGbtyesTotal}}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sfchart">
+                <div class="mycharts_title">归置组</div>
+                <div class="mycharts_pic">
+                    <div id="PGInfo1" ata-ng-show="show" bar-charts data-source='itemData' style="width:200px;height:200px;"></div>
+                </div>
+                <div class="mycharts_description pginfo_right">
+                </div>
+            </div>
+            <div class="sfchart">
+                <div class="mycharts_title">存储池</div>
+                <div class="mycharts_pic">
+                    <div id="PoolInfo" ata-ng-show="show" bar-charts data-source='itemData' style="width:200px;height:200px;"></div>
+                </div>
+                <div class="mycharts_description poolinfo_right">
+                    <ul>
+                        <li>池数量</li>
+                        <li>{{PoolNum}}</li>
+                    </ul>
+                    <ul>
+                        <li>已使用</li>
+                        <li>{{poolUsed}}</li>
+                    </ul>
+                    <ul>
+                        <li>写入对象</li>
+                        <li>{{poolTotal}}个</li>
+                    </ul>
+                </div>
+            </div>
+            <!--<div class="sfchart">-->
+                <!--<div id="IOPS" ata-ng-show="show" bar-charts data-source='itemData' style="width:400px;height:200px;"></div>-->
+            <!--</div>-->
+            <div class="sfchart" style="width: 49%;height: 310px">
+                <div id="OPS" ata-ng-show="show" bar-charts data-source='itemData' style="width: 100%;height: 310px "></div>
+            </div>
+            <div class="sfchart" style="width: 49%;height: 310px">
+                <div id="BPS" ata-ng-show="show" bar-charts data-source='itemData' style="width: 100%;height: 310px "></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

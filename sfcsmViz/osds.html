@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html ng-app="OsdsApp">
+<head>
+    <meta charset="UTF-8"/>
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/angular-misc/D3Directives.js"></script>
+    <script src="scripts/osdsApp.js"></script>
+    <script src="scripts/d3/d3.v3.min.js"></script>
+    <script src="scripts/d3/nv.d3.min.js" charset="utf-8"></script>
+    <script src="scripts/d3/common.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/tooltip.css"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/testAdmin.css">
+    <link rel="stylesheet" href="css/nv.d3.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <title>Osds</title>
+    <style>
+        #controlPanel0 {
+            border: black solid 1px;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            margin: 10px;
+            border-radius: 5px;
+            vertical-align: middle;
+            line-height: 40px;
+            padding: 5px;
+        }
+
+        #controlPanel1 {
+            max-width:250px;
+            border: black solid 1px;
+            position: fixed;
+            top: 150px;
+            right: 0px;
+            margin: 10px;
+            border-radius: 5px;
+            vertical-align: middle;
+            padding: 5px;
+            background-color: white;
+        }
+
+        #controlPanel0 input[type=number],
+        #controlPanel1  input[type=number] {
+            width: 40px;
+        }
+    </style>
+
+</head>
+<body ng-controller="OsdsCtrl">
+
+<header ng-include src="'partials/header.html'" ng-init="pageTitle='Ceph OSD status'"></header>
+
+<form>
+    <div id="controlPanel0">
+        <table>
+            <tr>
+                <td> Display attribute:</td>
+                <td>
+                    <select ng-model="dispoMode" ng-options="dispoMode for dispoMode in dispoModes"></select>
+                </td>
+            </tr>
+        </table>
+        </p></div>
+    </div>
+</form>
+
+<div id="controlPanel1" ng-hide="count == 0">
+    <div class="osd  {{osdClass(osd)}}" style="float:right">
+        {{osd.node._id}}
+    </div>
+    <h1>{{osd.node.name}}</h1>
+    <strong>{{osdState(osd)}}</strong>
+    <br><br>
+
+    <div id="osdStatGraph"><svg style="height:180px;width:100%"></svg></div>
+    last control : {{osd.lastControl|duration}}<br>
+    reweight : {{osd.reweight }}<br>
+    {{osd.partition._id}}<br>
+    {{osd.public_addr}}<br>
+    <ad-gauge value="osd.partition.stat.used/osd.partition.stat.total" colormode="desc" width="241"></ad-gauge>
+    <div class="gaugeLegend">
+        {{osd.partition.stat.used| bytes}} used <br>on {{osd.partition.stat.total| bytes}}
+    </div>
+
+    <div ng-show="hasRole('admin')">
+        <hr>
+        <div align="center">
+            <a class="btn btn-success" ng-hide="osd.stat.in == true" ng-click="osdIn(selectedOsd)" ><i class="icon-white icon-plus"></i> get in</a>
+            <a class="btn btn-danger" ng-hide="osd.stat.in != true" ng-click="osdOut(selectedOsd)"><i class="icon-white icon-minus"></i> get out</a>
+            <a class="btn btn-warning" ng-hide="osd.stat.up == false" ng-click="osdDown(selectedOsd)"><i class="icon-white icon-arrow-down"></i> down</a>
+            <a href="monitorOSD.html#/osd/osd-{{osd.node._id}}" class="btn btn-info" ng-show="useInfluxDB"><i class="fa fa-line-chart"></i> Monitor</a>
+        </div>
+        <div>
+            <hr>
+            <input ng-model="reweight" id="reweight" type="text">
+            <a class="btn btn-warning btn-small" ng-click="osdReweight(selectedOsd)"><i class="fa fa-balance-scale"></i> Reweight</a>
+        </div>
+    </div>
+</div>
+
+<div id="filters" >
+    <div class="title">Filters</div>
+    <div class="filter clickable" ng-hide="!inFilter"  ng-click="removeFilter('in')"> x in</div>
+    <div class="notfilter clickable" ng-hide="inFilter" ng-click="addFilter('in')"> + in</div>
+    <div class="filter clickable" ng-hide="!outFilter" ng-click="removeFilter('out')"> x out</div>
+    <div class="notfilter clickable" ng-hide="outFilter" ng-click="addFilter('out')"> + out</div>
+    <div class="filter clickable" ng-hide="!upFilter" ng-click="removeFilter('up')"> x up</div>
+    <div class="notfilter clickable" ng-hide="upFilter" ng-click="addFilter('up')"> + up</div>
+    <div class="filter clickable" ng-hide="!downFilter" ng-click="removeFilter('down')"> x down</div>
+    <div class="notfilter clickable" ng-hide="downFilter" ng-click="addFilter('down')"> + down</div>
+</div>
+<br style="clear: both">
+    <div style="margin-left:10px">Minimum fill rate <span style="width:30px;display:inline-block">{{minUsedSpace}}%</span> <input type="range" ng-model="minUsedSpace"></div>
+<br>
+<div id="datePanel"><br>Date : {{date | date:'HH:mm:ss'}} - matching: {{count}} of {{nbOsd}} OSD
+    <div ng-hide="osdControl<15 || count == 0">
+        <a href="probes.html">
+            <p class="text-warning"> <i class="icon-warning-sign" ></i> last control for osds:  {{osdControl|duration}}</p>
+        </a>
+    </div>
+</div>
+
+
+<div id="osds" ng-show="dispoMode == 'state'">
+    <div ng-repeat="osd in data|orderBy:'id'" class=" tooltips osd {{osdClass(osd)}}" ng-show="filledOver(osd)" ng-hide="osd.lost">
+        <div ng-click="osdSelect(osd);">
+            {{osd.id}}
+            <div> <!-- tooltip -->
+                <span>
+                    <strong>{{osd.node.name}}</strong> {{osdState(osd)}}<br>
+                    last control : {{osd.lastControl|duration}}<br><br>
+                    {{osd.partition._id}}<br>
+                    {{osd.public_addr}}<br>
+                    reweight : {{(1*osd.stat.weight).toString()}}<br>
+                    free : {{osd.partition.stat.free|bytes}}<br>
+                    used : {{osd.partition.stat.used|bytes}}<br>
+                    total: {{osd.partition.stat.total|bytes}}<br>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="osdspaces" ng-show="dispoMode == 'used space (%)'">
+    <div ng-repeat="osd in data|orderBy:'id'" class="tooltips osdspace"  ng-show="filledOver(osd)">
+        <div ng-click="osdSelect(osd);">
+            osd {{osd.id}}<br>
+            <ad-gauge value="osd.partition.stat.used/osd.partition.stat.total" colormode="desc" width="120" type="plain" animated="false"></ad-gauge>
+            <div> <!-- tooltip -->
+                <span>
+                    <strong>{{osd.node.name}}</strong> {{osdState(osd)}}<br>
+                    last control : {{osd.lastControl|duration}}<br><br>
+                    {{osd.partition._id}}<br>
+                    {{osd.public_addr}}<br>
+                    reweight : {{(1*osd.stat.weight).toString()}}<br>
+                    free : {{osd.partition.stat.free|bytes}}<br>
+                    used : {{osd.partition.stat.used|bytes}}<br>
+                    total: {{osd.partition.stat.total|bytes}}<br>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

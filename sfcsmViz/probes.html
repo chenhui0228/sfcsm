@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="ProbesApp">
+<head>
+    <meta charset=utf-8/>
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular-misc/ng-table.min.js"></script>
+    <script src="scripts/angular-misc/angular-commons.js"></script>
+    <script src="scripts/angular-misc/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="scripts/angular-misc/dialogs.v2.min.js"></script>
+    <script src="scripts/probesApp.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/tooltip.css"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/testAdmin.css">
+    <title>Probes status</title>
+</head>
+<body ng-controller="ProbesCtrl">
+
+<header ng-include src="'partials/header.html'" ng-init="pageTitle='Probes status'"></header>
+
+
+<div id="datePanel">Date : {{date | date:'HH:mm:ss'}}</div>
+<br>
+
+
+<div id="probes">
+
+    Sfcsm server date: {{timestamp_sfcsm| date:'yyyy/MM/dd HH:mm:ss'}}<br>
+    <h3>Ceph probes</h3>
+
+    <div ng-repeat="probe in cephprobes | orderBy:'_id'" class=" tooltips {{probe.class}}">
+        {{probe._id}}
+        <div> <!-- tooltip -->
+                <span>
+                    <strong>{{probe._id}}</strong><br>
+                    last heartbeat : {{probe.lastHB|duration}}<br>
+                    date : {{probe.dateHB| date:'yyyy/MM/dd HH:mm:ss'}}<br>
+                </span>
+        </div>
+    </div>
+    <br style="clear:both">
+    <br>
+    <h3>Sys probes</h3>
+
+    <div ng-repeat="probe in sysprobes | orderBy:'_id'" class=" tooltips {{probe.class}}">
+        {{probe._id}}
+        <div> <!-- tooltip -->
+                <span>
+                    <strong>{{probe._id}}</strong><br>
+                    last heartbeat : {{probe.lastHB|duration}}<br>
+                    date : {{probe.dateHB| date:'yyyy/MM/dd HH:mm:ss'}}<br>
+                </span>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
